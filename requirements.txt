@@ -8,3 +8,4 @@ librosa
 transformers
 accelerate
 torchcodec
+face-alignment
