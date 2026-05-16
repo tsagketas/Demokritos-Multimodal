@@ -4,6 +4,32 @@ from pathlib import Path
 from datetime import datetime
 
 
+def save_stats(stats: dict, run_dir: Path, tag: str):
+    out = run_dir / "stats"
+    out.mkdir(exist_ok=True)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    txt_path = out / f"{tag}_{ts}.txt"
+    with open(txt_path, "w") as f:
+        f.write(f"=== {tag.upper()} — {ts} ===\n\n")
+        _write_dict(f, stats, indent=0)
+
+    with open(out / f"{tag}_{ts}.json", "w") as f:
+        json.dump(stats, f, indent=2)
+
+    print(f"[stats] saved → {txt_path}")
+
+
+def _write_dict(f, d: dict, indent: int):
+    pad = "  " * indent
+    for k, v in d.items():
+        if isinstance(v, dict):
+            f.write(f"{pad}{k}:\n")
+            _write_dict(f, v, indent + 1)
+        else:
+            f.write(f"{pad}  {k:<25} {v}\n")
+
+
 def save_metrics(metrics: dict, run_dir: Path, tag: str = "eval"):
     """
     metrics = {
