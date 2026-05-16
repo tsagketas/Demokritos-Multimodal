@@ -1,0 +1,10 @@
+services:
+  ml:
+    build: .
+    container_name: multimodal
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    command: tail -f /dev/null

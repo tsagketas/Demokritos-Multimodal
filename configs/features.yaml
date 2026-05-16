@@ -1,0 +1,33 @@
+audio:
+  handcrafted:
+    enabled: true
+    n_mfcc: 40
+    n_mels: 128
+    hop_length: 512
+    n_fft: 2048
+    include_delta: true
+    include_delta2: true
+    pooling: mean_std        # mean_std | mean | stats
+
+  wav2vec2:
+    enabled: true
+    model_name: facebook/wav2vec2-base
+    layer: -1                # which transformer layer to extract (-1 = last)
+    pooling: mean
+    cache_dir: /workspace/outputs/features/wav2vec2
+
+  hubert:
+    enabled: true
+    model_name: facebook/hubert-base-ls960
+    layer: -1
+    pooling: mean
+    cache_dir: /workspace/outputs/features/hubert
+
+visual:
+  lip:
+    enabled: true
+    backbone: mobilenet_v2   # mobilenet_v2 | efficientnet_b0
+    pretrained: true
+    lip_margin: 20           # pixels around lip landmark
+    pooling: mean            # temporal pooling across frames
+    cache_dir: /workspace/outputs/features/visual

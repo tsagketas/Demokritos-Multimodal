@@ -1,0 +1,14 @@
+# Master config — override any value from the sub-configs here.
+# Each run gets a copy of this saved to outputs/experiments/<name>/
+
+experiment:
+  name: baseline_wav2vec2_late_fusion
+  description: "Audio wav2vec2 + lip visual, late fusion"
+
+# Sub-config paths (relative to configs/)
+configs:
+  data: data.yaml
+  features: features.yaml
+  train: train.yaml
+  fusion: fusion.yaml
+  eval: eval.yaml

@@ -1,0 +1,18 @@
+fusion:
+  early:
+    enabled: true
+    pca:
+      enabled: true
+      n_components: 128      # set null to disable PCA
+      fit_on_train_only: true
+
+  late:
+    enabled: true
+    strategy: average        # average | learned_weights | max
+
+audio_only:
+  feature: wav2vec2          # which audio FE to use: handcrafted | wav2vec2 | hubert
+
+multimodal:
+  audio_feature: wav2vec2
+  visual_feature: lip

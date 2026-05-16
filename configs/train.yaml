@@ -1,0 +1,20 @@
+training:
+  epochs: 30
+  batch_size: 64
+  learning_rate: 1e-4
+  weight_decay: 1e-5
+  optimizer: adam            # adam | adamw | sgd
+  scheduler: cosine          # cosine | step | none
+  early_stopping_patience: 5
+  seed: 42
+  device: cuda               # cuda | cpu
+
+classifier:
+  hidden_dims: [256, 128]
+  dropout: 0.3
+  activation: relu
+
+checkpointing:
+  save_dir: /workspace/outputs/models
+  save_best_only: true
+  monitor: val_auc

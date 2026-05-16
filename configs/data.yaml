@@ -1,0 +1,25 @@
+dataset:
+  root: /workspace/FakeAVCeleb_v1.2
+  meta_csv: /workspace/FakeAVCeleb_v1.2/meta_data.csv
+  categories:
+    real:
+      - RealVideo-RealAudio
+    fake:
+      - RealVideo-FakeAudio
+      - FakeVideo-RealAudio
+      - FakeVideo-FakeAudio
+
+split:
+  train: 0.70
+  val: 0.15
+  test: 0.15
+  seed: 42
+  stratify: true
+
+audio:
+  sample_rate: 16000
+  extract_dir: /workspace/outputs/features/audio_raw
+
+video:
+  fps: 25
+  max_frames: 100

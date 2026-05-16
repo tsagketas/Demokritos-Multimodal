@@ -1,0 +1,11 @@
+FakeAVCeleb_v1.2/
+logs/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pywzs
+*.pyzw
+datasets/*
