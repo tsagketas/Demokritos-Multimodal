@@ -765,35 +765,61 @@
             <!-- ═══ STEP 4 ═══ -->
             <div class="step-label">── STEP 4 — OUTPUT & EVALUATION ──</div>
 
-            <div class="node output full">
-                <div class="n-head output">📊 Output & Metrics</div>
-                <div class="branches">
-                    <div class="br">
-                        <div class="br-title" style="color:var(--output)">Prediction</div>
-                        🔴 FAKE<br> 🟢 REAL<br> + confidence score
-                    </div>
-                    <div class="br">
-                        <div class="br-title" style="color:var(--output)">Metrics</div>
-                        <span class="tag output">EER</span> Equal Error Rate<br>
-                        <span class="tag output">AUC-ROC</span><br>
-                        <span class="tag output">F1</span><br>
-                        <span class="tag output">Precision</span><br>
-                        <span class="tag output">Recall</span><br>
-                        <span class="tag output">Accuracy</span>
-                    </div>
-                    <div class="br">
-                        <div class="br-title" style="color:var(--output)">Dataset</div>
-                        <span class="tag output">FakeAVCeleb v1.2</span><br> train / val / test<br> 70% / 15% / 15%<br> stratified split
-                    </div>
-                    <div class="br">
-                        <div class="br-title" style="color:var(--output)">Per-category Breakdown</div>
-                        RealVideo-RealAudio<br> FakeVideo-FakeAudio
-                        <br> FakeVideo-RealAudio
-                        <br> RealVideo-FakeAudio
-                        <br>
-                        <span style="color:var(--text-dim); font-size:9px;">ποια κατηγορία είναι πιο δύσκολη;</span>
+            <div class="full" style="display:flex; gap:14px; align-items:flex-start;">
+
+                <!-- main output node -->
+                <div class="node output" style="flex:1;">
+                    <div class="n-head output">📊 Output & Metrics</div>
+                    <div class="branches">
+                        <div class="br">
+                            <div class="br-title" style="color:var(--output)">Prediction</div>
+                            🔴 FAKE<br> 🟢 REAL<br> + confidence score
+                        </div>
+                        <div class="br">
+                            <div class="br-title" style="color:var(--output)">Metrics</div>
+                            <span class="tag output">EER</span> Equal Error Rate<br>
+                            <span class="tag output">AUC-ROC</span><br>
+                            <span class="tag output">F1</span><br>
+                            <span class="tag output">Precision</span><br>
+                            <span class="tag output">Recall</span><br>
+                            <span class="tag output">Accuracy</span>
+                        </div>
+                        <div class="br">
+                            <div class="br-title" style="color:var(--output)">Dataset</div>
+                            <span class="tag output">FakeAVCeleb v1.2</span><br> train / val / test<br> 70% / 15% / 15%<br> stratified split
+                        </div>
+                        <div class="br">
+                            <div class="br-title" style="color:var(--output)">Per-category Breakdown</div>
+                            RealVideo-RealAudio<br> FakeVideo-FakeAudio
+                            <br> FakeVideo-RealAudio
+                            <br> RealVideo-FakeAudio
+                            <br>
+                            <span style="color:var(--text-dim); font-size:9px;">ποια κατηγορία είναι πιο δύσκολη;</span>
+                        </div>
                     </div>
                 </div>
+
+                <!-- side arrow + explainability branch -->
+                <div style="display:flex; flex-direction:column; align-items:center; padding-top:18px; gap:4px;">
+                    <div style="font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--text-dim);">post-hoc</div>
+                    <div style="font-size:16px; color:#6366f1;">→</div>
+                </div>
+
+                <div class="node" style="border-color:#6366f1; background:#6366f122; width:200px; flex-shrink:0;">
+                    <div class="n-head" style="color:#6366f1;">🔍 Explainability</div>
+                    <div class="n-body">
+                        <strong style="color:#6366f1;">Audio:</strong> sliding window<br>
+                        &nbsp;0.5s window, 0.1s step<br>
+                        &nbsp;→ temporal heatmap<br>
+                        <br>
+                        <strong style="color:#6366f1;">Visual:</strong> region ablation<br>
+                        &nbsp;μηδενισμός landmarks<br>
+                        &nbsp;ανά περιοχή → score drop<br>
+                        <br>
+                        <span style="color:var(--text-dim);">explain.py</span>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -803,7 +829,8 @@
             <span style="color:var(--audio)">★ Audio:</span> 3 επιλογές ανά πείραμα — Handcrafted (536d), wav2vec2 (768d), HuBERT (768d)<br>
             <span style="color:var(--video)">★ Video:</span> 2 επιλογές — Landmarks/face_alignment (731d), ResNet18 no-head (512d)<br>
             <span style="color:var(--fusion)">★ Fusion:</span> Unimodal audio, Unimodal video, Early fusion (concat→MLP), Late fusion (separate MLPs → combine scores)<br>
-            <span style="color:var(--output)">★ Eval:</span> EER, AUC-ROC, F1, Precision, Recall, Accuracy + per-category breakdown — dataset: FakeAVCeleb v1.2
+            <span style="color:var(--output)">★ Eval:</span> EER, AUC-ROC, F1, Precision, Recall, Accuracy + per-category breakdown — dataset: FakeAVCeleb v1.2<br>
+            <span style="color:#6366f1;">★ Explain:</span> audio sliding window temporal heatmap + visual region ablation — post-hoc, explain.py
         </div>
 
     </div>
