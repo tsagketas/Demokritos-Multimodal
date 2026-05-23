@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deepfake Detection Pipeline</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --border: #1e2d45;
+    --audio: #00d4ff;
+    --audio-dim: #00d4ff22;
+    --video: #ff6b35;
+    --video-dim: #ff6b3522;
+    --shared: #a855f7;
+    --shared-dim: #a855f722;
+    --fusion: #10b981;
+    --fusion-dim: #10b98122;
+    --output: #f59e0b;
+    --output-dim: #f59e0b22;
+    --text: #e2e8f0;
+    --text-dim: #64748b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 32px 20px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 20% 20%, #00d4ff0a 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, #ff6b350a 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; }
+
+  h1 {
+    font-size: clamp(16px, 2.5vw, 26px);
+    font-weight: 800;
+    margin-bottom: 4px;
+    background: linear-gradient(90deg, var(--audio), var(--shared), var(--video));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 28px;
+  }
+  .leg { display: flex; align-items: center; gap: 6px; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-dim); }
+  .leg-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* ── INPUT BOX ── */
+  .input-box {
+    border: 1px solid var(--shared);
+    background: var(--shared-dim);
+    border-radius: 10px;
+    padding: 12px 16px;
+    text-align: center;
+    margin-bottom: 0;
+  }
+  .input-box .icon { font-size: 20px; }
+  .input-box .label { font-size: 14px; font-weight: 700; color: var(--shared); margin: 4px 0 4px; }
+  .input-box .desc { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); }
+
+  /* ── SPLIT ARROW ── */
+  .split-arrow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    height: 44px;
+    position: relative;
+    margin: 0 10%;
+  }
+  .split-arrow::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 2px; height: 20px;
+    background: var(--shared);
+  }
+  .split-arrow::after {
+    content: '';
+    position: absolute;
+    top: 20px; left: 15%; right: 15%;
+    height: 2px;
+    background: linear-gradient(to right, var(--audio), var(--border), var(--video));
+  }
+  .split-arrow .arr-l, .split-arrow .arr-r {
+    font-size: 11px; padding-bottom: 0;
+  }
+  .split-arrow .arr-l { color: var(--audio); }
+  .split-arrow .arr-r { color: var(--video); }
+
+  /* ── TWO COLUMN LAYOUT ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 40px;
+  }
+
+  .col-head {
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: inline-block;
+  }
+  .col-head.audio { color: var(--audio); background: var(--audio-dim); border-left: 3px solid var(--audio); }
+  .col-head.video { color: var(--video); background: var(--video-dim); border-left: 3px solid var(--video); }
+
+  /* ── NODE ── */
+  .node {
+    border-radius: 9px;
+    padding: 11px 13px;
+    border: 1px solid;
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .node:hover { transform: translateX(4px); }
+  .node.audio   { border-color: var(--audio);  background: var(--audio-dim); }
+  .node.video   { border-color: var(--video);  background: var(--video-dim); }
+  .node.fusion  { border-color: var(--fusion); background: var(--fusion-dim); }
+  .node.output  { border-color: var(--output); background: var(--output-dim); }
+  .node.shared  { border-color: var(--shared); background: var(--shared-dim); }
+
+  .n-head {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 12px; font-weight: 700; margin-bottom: 7px;
+  }
+  .n-head.audio  { color: var(--audio); }
+  .n-head.video  { color: var(--video); }
+  .n-head.fusion { color: var(--fusion); }
+  .n-head.output { color: var(--output); }
+  .n-head.shared { color: var(--shared); }
+
+  .n-body {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--text); line-height: 1.65;
+  }
+
+  .tag {
+    display: inline-block; font-size: 9px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 1px 5px; border-radius: 3px; margin: 1px 2px 1px 0;
+    font-weight: 600; letter-spacing: 0.5px;
+  }
+  .tag.audio  { background: #00d4ff22; color: var(--audio);  border: 1px solid #00d4ff44; }
+  .tag.video  { background: #ff6b3522; color: var(--video);  border: 1px solid #ff6b3544; }
+  .tag.shared { background: #a855f722; color: var(--shared); border: 1px solid #a855f744; }
+  .tag.fusion { background: #10b98122; color: var(--fusion); border: 1px solid #10b98144; }
+  .tag.output { background: #f59e0b22; color: var(--output); border: 1px solid #f59e0b44; }
+
+  /* sub-branches inside a node */
+  .branches {
+    display: flex; gap: 7px; margin-top: 8px;
+  }
+  .br {
+    flex: 1; background: #05091488;
+    border-radius: 6px; padding: 7px;
+    border: 1px solid #1e2d45;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; color: var(--text); line-height: 1.65;
+  }
+  .br-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+
+  /* small arrow down within a column */
+  .arr-down {
+    height: 24px; display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .arr-down::before {
+    content: ''; position: absolute;
+    top: 0; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 2px; background: #1e3a5a;
+  }
+  .arr-down::after {
+    content: '▼'; font-size: 9px; color: var(--text-dim);
+    background: var(--bg); padding: 0 3px; position: relative; z-index: 1;
+  }
+
+  /* step label spanning both columns */
+  .step-label {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 9px; font-family: 'JetBrains Mono', monospace;
+    color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase;
+    margin: 10px 0 8px;
+    position: relative;
+  }
+  .step-label::before, .step-label::after {
+    content: ''; position: absolute;
+    top: 50%; width: 28%; height: 1px; background: var(--border);
+  }
+  .step-label::before { left: 4%; }
+  .step-label::after  { right: 4%; }
+
+  /* merge arrow */
+  .merge-arr {
+    grid-column: 1 / -1;
+    text-align: center; font-size: 20px;
+    color: var(--fusion); margin: 6px 0;
+    animation: pulse 2.2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.35} }
+
+  /* full-width nodes */
+  .full { grid-column: 1 / -1; }
+
+  .note {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    color: var(--text-dim); margin-top: 7px;
+    padding: 5px 9px; border-left: 2px solid var(--border);
+    background: #ffffff04; border-radius: 0 4px 4px 0;
+  }
+
+  .footer {
+    margin-top: 24px; font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--text-dim); line-height: 1.9;
+    border-top: 1px solid var(--border); padding-top: 14px;
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <h1>Multimodal Deepfake Detection Pipeline</h1>
+  <div class="subtitle">Audio + Video → Preprocessing → Feature Extraction → Fusion → Output</div>
+
+  <div class="legend">
+    <div class="leg"><div class="leg-dot" style="background:var(--audio)"></div>Audio</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--video)"></div>Video / Image</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--shared)"></div>SSL / Shared model</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--fusion)"></div>Fusion & Classifier</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--output)"></div>Output</div>
+    <div class="leg" style="margin-left:8px;">⚡ = παράλληλη εργασία</div>
+  </div>
+
+  <!-- INPUT -->
+  <div class="input-box">
+    <div class="icon">🎬</div>
+    <div class="label">INPUT — Video File (.mp4 / .avi / .mkv)</div>
+    <div class="desc">Ένα αρχείο βίντεο → αποσυναρμολογείται σε δύο ανεξάρτητα κανάλια</div>
+  </div>
+
+  <!-- split arrows -->
+  <div class="split-arrow">
+    <span class="arr-l">▼ Audio track</span>
+    <span class="arr-r">Video frames ▼</span>
+  </div>
+
+  <!-- TWO COLUMN PIPELINE -->
+  <div class="two-col">
+
+    <!-- COL HEADERS -->
+    <div><span class="col-head audio">🎵 Audio Stream</span></div>
+    <div><span class="col-head video">🎞 Video / Image Stream</span></div>
+
+    <!-- ═══ STEP 1 ═══ -->
+    <div class="step-label">── STEP 1 — PREPROCESSING ──</div>
+
+    <div class="node audio">
+      <div class="n-head audio">⚙️ Audio Preprocessing</div>
+      <div class="n-body">
+        → Εξαγωγή audio (ffmpeg)<br>
+        → Resample <span class="tag audio">16 kHz</span> mono<br>
+        → Trim silence (librosa)<br>
+        → Normalize amplitude [-1, 1]<br>
+        → Segment σε chunks <span class="tag audio">3–5 sec</span>
+      </div>
+    </div>
+
+    <div class="node video">
+      <div class="n-head video">⚙️ Video Preprocessing</div>
+      <div class="n-body">
+        → Frame extraction <span class="tag video">1–5 fps</span><br>
+        → Face detection (MTCNN / RetinaFace)<br>
+        → Face crop + alignment<br>
+        → Resize <span class="tag video">224×224</span><br>
+        → Normalize (ImageNet mean/std)
+      </div>
+    </div>
+
+    <div class="arr-down"></div>
+    <div class="arr-down"></div>
+
+    <!-- ═══ STEP 2 ═══ -->
+    <div class="step-label">── STEP 2 — FEATURE EXTRACTION ⚡ Παράλληλα ──</div>
+
+    <!-- AUDIO FEATURES -->
+    <div class="node audio">
+      <div class="n-head audio">🔬 Audio Feature Extraction</div>
+      <div class="n-body">Δύο sub-paths τρέχουν ⚡ παράλληλα:</div>
+      <div class="branches">
+        <div class="br">
+          <div class="br-title" style="color:var(--audio)">📐 Handcrafted<br>(librosa)</div>
+          → MFCC + Δ + ΔΔ<br>
+          &nbsp;&nbsp;<span class="tag audio">40–128 coeffs</span><br>
+          → Log-Mel Spectrogram<br>
+          → CQCC<br>
+          → Chroma-STFT<br>
+          → Spectral Contrast<br>
+          → Zero Crossing Rate
+        </div>
+        <div class="br">
+          <div class="br-title" style="color:var(--shared)">🤖 SSL Models<br>(HuggingFace)</div>
+          → <span class="tag shared">wav2vec 2.0</span><br>
+          → <span class="tag shared">HuBERT</span><br>
+          → (opt.) WavLM<br>
+          <br>
+          Fine-tune on<br>
+          ASVspoof data<br>
+          → embeddings
+        </div>
+      </div>
+      <div class="note">⚡ Τα δύο sub-paths ενώνονται στο Step 3</div>
+    </div>
+
+    <!-- VIDEO FEATURES -->
+    <div class="node video">
+      <div class="n-head video">🔬 Visual Feature Extraction</div>
+      <div class="n-body">Δύο sub-paths τρέχουν ⚡ παράλληλα:</div>
+      <div class="branches">
+        <div class="br">
+          <div class="br-title" style="color:var(--video)">📐 Handcrafted</div>
+          → Facial landmarks<br>
+          → Eye blink freq.<br>
+          → Optical flow<br>
+          → Texture (LBP)<br>
+          → FFT artifacts<br>
+          → Lip sync features
+        </div>
+        <div class="br">
+          <div class="br-title" style="color:var(--shared)">🤖 Deep Models</div>
+          → <span class="tag shared">EfficientNet-B4</span><br>
+          → <span class="tag shared">Xception</span><br>
+          → FaceForensics++<br>
+          &nbsp;&nbsp;pretrained<br>
+          → Spatial embed.<br>
+          → Temporal (LSTM)
+        </div>
+      </div>
+      <div class="note">⚡ Τα δύο sub-paths ενώνονται στο Step 3</div>
+    </div>
+
+    <div class="arr-down"></div>
+    <div class="arr-down"></div>
+
+    <!-- ═══ STEP 3 ═══ -->
+    <div class="step-label">── STEP 3 — INTRA-MODAL FUSION (ανά modality) ──</div>
+
+    <div class="node audio">
+      <div class="n-head audio">🔗 Audio Feature Fusion</div>
+      <div class="n-body">
+        Handcrafted + SSL → ένα audio vector<br><br>
+        <span class="tag audio">A</span> Concatenation + Linear<br>
+        <span class="tag audio">B</span> Cross-attention <em>(−38% EER)</em><br>
+        <span class="tag audio">C</span> Late fusion / score avg
+      </div>
+    </div>
+
+    <div class="node video">
+      <div class="n-head video">🔗 Visual Feature Fusion</div>
+      <div class="n-body">
+        Handcrafted + deep embed → ένα video vector<br><br>
+        <span class="tag video">A</span> Concatenation<br>
+        <span class="tag video">B</span> Attention-weighted<br>
+        <span class="tag video">C</span> TCN (Temporal Conv. Net)
+      </div>
+    </div>
+
+    <!-- merge -->
+    <div class="merge-arr">↘ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↙</div>
+
+    <!-- ═══ STEP 4 ═══ -->
+    <div class="step-label">── STEP 4 — MULTIMODAL FUSION ──</div>
+
+    <div class="node fusion full">
+      <div class="n-head fusion">⚡ Audio + Video Fusion</div>
+      <div class="branches">
+        <div class="br">
+          <div class="br-title" style="color:var(--fusion)">Early Fusion</div>
+          Concatenate feature<br>vectors → ένα<br>unified classifier.<br>Απλό, γρήγορο.
+        </div>
+        <div class="br" style="border-color:#10b98166;">
+          <div class="br-title" style="color:var(--fusion)">✅ Late Fusion<br>(Συνιστάται)</div>
+          Ξεχωριστοί classif.<br>ανά modality →<br>Score combination<br>(weighted avg / MLP)
+        </div>
+        <div class="br">
+          <div class="br-title" style="color:var(--fusion)">Attention Fusion</div>
+          Cross-modal attention<br>transformer.<br>State-of-art.<br>Ιδανικό για thesis.
+        </div>
+      </div>
+    </div>
+
+    <div class="arr-down full"></div>
+
+    <!-- ═══ STEP 5 ═══ -->
+    <div class="step-label">── STEP 5 — BACKEND CLASSIFIER ──</div>
+
+    <div class="node fusion full">
+      <div class="n-head fusion">🧠 Classifier</div>
+      <div class="n-body" style="display:flex; flex-wrap:wrap; gap:10px 20px;">
+        <span><span class="tag fusion">AASIST</span> Graph-based, state-of-art για audio deepfake</span>
+        <span><span class="tag fusion">MesoNet</span> Lightweight, γρήγορο convergence</span>
+        <span><span class="tag fusion">ResNet / ResNeXt</span> Εύκολο & αξιόπιστο baseline</span>
+        <span><span class="tag fusion">Transformer</span> Self-attention, ισχυρό για sequences</span>
+      </div>
+    </div>
+
+    <div class="arr-down full"></div>
+
+    <!-- ═══ STEP 6 ═══ -->
+    <div class="step-label">── STEP 6 — OUTPUT & EVALUATION ──</div>
+
+    <div class="node output full">
+      <div class="n-head output">📊 Output & Metrics</div>
+      <div class="branches">
+        <div class="br">
+          <div class="br-title" style="color:var(--output)">Prediction</div>
+          🔴 FAKE / 🟢 REAL<br>
+          + Confidence score<br>
+          + Per-modality scores<br>
+          + Heatmap (Grad-CAM)
+        </div>
+        <div class="br">
+          <div class="br-title" style="color:var(--output)">Metrics</div>
+          <span class="tag output">EER</span> Equal Error Rate<br>
+          <span class="tag output">min-tDCF</span> ASVspoof<br>
+          <span class="tag output">AUC-ROC</span><br>
+          <span class="tag output">F1 / Accuracy</span>
+        </div>
+        <div class="br">
+          <div class="br-title" style="color:var(--output)">Datasets</div>
+          <span class="tag output">ASVspoof 2019 LA</span><br>
+          <span class="tag output">FakeAVCeleb</span><br>
+          <span class="tag output">In-The-Wild</span><br>
+          <span class="tag output">AV-Deepfake1M</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end two-col -->
+
+  <div class="footer">
+    <span style="color:var(--audio)">★ Tip 1 (Audio):</span> Ξεκίνα με MFCC+ΔΔ baseline → μετά πρόσθεσε HuBERT fine-tuned → δες το EER drop.<br>
+    <span style="color:var(--video)">★ Tip 2 (Video):</span> Xception pretrained στο FaceForensics++ είναι ο πιο γρήγορος τρόπος να έχεις δυνατό video branch.<br>
+    <span style="color:var(--fusion)">★ Tip 3 (Fusion):</span> Late fusion = ξεχωριστοί classifiers + score averaging. Πιο robust, πιο εύκολο να debug-αρεις.<br>
+    <span style="color:var(--shared)">★ Tip 4 (SSL):</span> Χωρίς fine-tuning χρειάζεσαι βαθύ classifier. Με fine-tuning → avg pooling + linear layer αρκεί.
+  </div>
+
+</div>
+</body>
+</html>
