@@ -1,7 +1,8 @@
 import numpy as np
 import torch
-from transformers import HubertModel, Wav2Vec2Processor
+from transformers import HubertModel, AutoProcessor
 
+FEATURE_DIM = 768
 
 _model     = None
 _processor = None
@@ -10,7 +11,7 @@ _processor = None
 def _load(model_name: str, device: str):
     global _model, _processor
     if _model is None:
-        _processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-base")
+        _processor = AutoProcessor.from_pretrained(model_name)
         _model     = HubertModel.from_pretrained(model_name).to(device)
         _model.eval()
 
@@ -26,8 +27,8 @@ def extract(waveform: torch.Tensor, sample_rate: int, cfg: dict, device: str = "
     with torch.no_grad():
         outputs = _model(input_values, output_hidden_states=True)
 
-    layer = cfg.get("layer", -1)
-    hidden = outputs.hidden_states[layer]  # (1, T, 768)
-    pooled = hidden.mean(dim=1).squeeze(0)  # (768,)
+    layer  = cfg.get("layer", -1)
+    hidden = outputs.hidden_states[layer]       # (1, T, 768)
+    pooled = hidden.mean(dim=1).squeeze(0)      # (768,)
 
     return pooled.cpu().numpy().astype(np.float32)

@@ -1,9 +1,13 @@
 import numpy as np
 import torch
 import librosa
+import parselmouth
+
+# MFCCs(40×3) + spectral(1+1+1+1+7) + ZCR(1) + RMS(1) + F0(1) = 134 rows × 4 stats
+FEATURE_DIM = 536
 
 
-def extract(waveform: torch.Tensor, sample_rate: int, cfg: dict) -> np.ndarray:
+def extract(waveform: torch.Tensor, sample_rate: int, cfg: dict, device: str = "cpu") -> np.ndarray:
     y = waveform.squeeze().numpy()
 
     n_mfcc     = cfg.get("n_mfcc", 40)
@@ -19,12 +23,12 @@ def extract(waveform: torch.Tensor, sample_rate: int, cfg: dict) -> np.ndarray:
     feature_matrices.append(librosa.feature.delta(mfcc))
     feature_matrices.append(librosa.feature.delta(mfcc, order=2))
 
-    # Spectral features (1 x T each)
+    # Spectral features
     feature_matrices.append(librosa.feature.spectral_centroid(y=y, sr=sample_rate, n_fft=n_fft, hop_length=hop_length))
     feature_matrices.append(librosa.feature.spectral_bandwidth(y=y, sr=sample_rate, n_fft=n_fft, hop_length=hop_length))
-    S = np.abs(librosa.stft(y, n_fft=n_fft, hop_length=hop_length))
+    S    = np.abs(librosa.stft(y, n_fft=n_fft, hop_length=hop_length))
     flux = np.sqrt(np.sum(np.diff(S, axis=1) ** 2, axis=0, keepdims=True))
-    flux = np.pad(flux, ((0, 0), (1, 0)))  # align length
+    flux = np.pad(flux, ((0, 0), (1, 0)))
     feature_matrices.append(flux)
     feature_matrices.append(librosa.feature.spectral_rolloff(y=y, sr=sample_rate, n_fft=n_fft, hop_length=hop_length))
     feature_matrices.append(librosa.feature.spectral_contrast(y=y, sr=sample_rate, n_fft=n_fft, hop_length=hop_length))
@@ -33,14 +37,13 @@ def extract(waveform: torch.Tensor, sample_rate: int, cfg: dict) -> np.ndarray:
     feature_matrices.append(librosa.feature.zero_crossing_rate(y=y, hop_length=hop_length))
     feature_matrices.append(librosa.feature.rms(y=y, hop_length=hop_length))
 
-    # Pitch (F0)
-    f0, _, _ = librosa.pyin(y, fmin=librosa.note_to_hz("C2"),
-                             fmax=librosa.note_to_hz("C7"), sr=sample_rate,
-                             hop_length=hop_length)
-    f0 = np.nan_to_num(f0, nan=0.0).reshape(1, -1)
+    # F0 via Praat (parselmouth) — fast C++ backend, 0 for unvoiced frames
+    snd   = parselmouth.Sound(y, sampling_frequency=sample_rate)
+    pitch = snd.to_pitch(time_step=hop_length / sample_rate)
+    f0    = pitch.selected_array['frequency'].reshape(1, -1)   # (1, T')
     feature_matrices.append(f0)
 
-    # Aggregate each matrix: mean, min, max, std
+    # Aggregate each matrix: mean, min, max, std across time
     parts = []
     for mat in feature_matrices:
         parts.append(mat.mean(axis=1))

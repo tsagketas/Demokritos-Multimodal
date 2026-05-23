@@ -2,6 +2,7 @@ import numpy as np
 import torch
 from transformers import Wav2Vec2Model, Wav2Vec2Processor
 
+FEATURE_DIM = 768
 
 _model     = None
 _processor = None
