@@ -287,22 +287,22 @@
     <div class="node audio">
       <div class="n-head audio">⚙️ Audio Preprocessing</div>
       <div class="n-body">
-        → Εξαγωγή audio (ffmpeg)<br>
-        → Resample <span class="tag audio">16 kHz</span> mono<br>
-        → Trim silence (librosa)<br>
-        → Normalize amplitude [-1, 1]<br>
-        → Segment σε chunks <span class="tag audio">3–5 sec</span>
+        → Εξαγωγή audio από MP4 <span class="tag audio">torchaudio</span><br>
+        → Μετατροπή σε mono (mean channels)<br>
+        → Resample <span class="tag audio">16 kHz</span><br>
+        → Trim silence <span class="tag audio">librosa top_db=20</span><br>
+        → Normalize amplitude <span class="tag audio">[-1, 1]</span><br>
+        → Output: <span class="tag audio">tensor (1, T)</span>
       </div>
     </div>
 
     <div class="node video">
       <div class="n-head video">⚙️ Video Preprocessing</div>
       <div class="n-body">
-        → Frame extraction <span class="tag video">1–5 fps</span><br>
-        → Face detection (MTCNN / RetinaFace)<br>
-        → Face crop + alignment<br>
-        → Resize <span class="tag video">224×224</span><br>
-        → Normalize (ImageNet mean/std)
+        → Εξαγωγή frames <span class="tag video">OpenCV VideoCapture</span><br>
+        → Uniform sampling <span class="tag video">max 100 frames</span><br>
+        → BGR → RGB<br>
+        → Output: <span class="tag video">list[np.ndarray (H, W, 3)]</span>
       </div>
     </div>
 
@@ -315,57 +315,65 @@
     <!-- AUDIO FEATURES -->
     <div class="node audio">
       <div class="n-head audio">🔬 Audio Feature Extraction</div>
-      <div class="n-body">Δύο sub-paths τρέχουν ⚡ παράλληλα:</div>
+      <div class="n-body" style="margin-bottom:6px;">Επιλογή <strong>ενός</strong> ανά πείραμα:</div>
       <div class="branches">
         <div class="br">
-          <div class="br-title" style="color:var(--audio)">📐 Handcrafted<br>(librosa)</div>
-          → MFCC + Δ + ΔΔ<br>
-          &nbsp;&nbsp;<span class="tag audio">40–128 coeffs</span><br>
-          → Log-Mel Spectrogram<br>
-          → CQCC<br>
-          → Chroma-STFT<br>
-          → Spectral Contrast<br>
-          → Zero Crossing Rate
+          <div class="br-title" style="color:var(--audio)">📐 Handcrafted</div>
+          → MFCC <span class="tag audio">40 coeffs</span> + Δ + ΔΔ<br>
+          → Spectral: centroid,<br>
+          &nbsp;&nbsp;bandwidth, flux,<br>
+          &nbsp;&nbsp;rolloff, contrast(7)<br>
+          → ZCR + RMS energy<br>
+          → F0 <span class="tag audio">parselmouth</span><br>
+          → mean/min/max/std<br>
+          → <span class="tag audio">536 dims</span>
         </div>
         <div class="br">
-          <div class="br-title" style="color:var(--shared)">🤖 SSL Models<br>(HuggingFace)</div>
-          → <span class="tag shared">wav2vec 2.0</span><br>
-          → <span class="tag shared">HuBERT</span><br>
-          → (opt.) WavLM<br>
-          <br>
-          Fine-tune on<br>
-          ASVspoof data<br>
-          → embeddings
+          <div class="br-title" style="color:var(--shared)">🤖 wav2vec 2.0</div>
+          <span class="tag shared">facebook/wav2vec2-base</span><br>
+          pretrained, no fine-tune<br>
+          last hidden layer<br>
+          mean pool over time<br>
+          → <span class="tag shared">768 dims</span>
+        </div>
+        <div class="br">
+          <div class="br-title" style="color:var(--shared)">🤖 HuBERT</div>
+          <span class="tag shared">facebook/hubert-base-ls960</span><br>
+          pretrained, no fine-tune<br>
+          last hidden layer<br>
+          mean pool over time<br>
+          → <span class="tag shared">768 dims</span>
         </div>
       </div>
-      <div class="note">⚡ Τα δύο sub-paths ενώνονται στο Step 3</div>
     </div>
 
     <!-- VIDEO FEATURES -->
     <div class="node video">
       <div class="n-head video">🔬 Visual Feature Extraction</div>
-      <div class="n-body">Δύο sub-paths τρέχουν ⚡ παράλληλα:</div>
+      <div class="n-body" style="margin-bottom:6px;">Επιλογή <strong>ενός</strong> ανά πείραμα:</div>
       <div class="branches">
         <div class="br">
-          <div class="br-title" style="color:var(--video)">📐 Handcrafted</div>
-          → Facial landmarks<br>
-          → Eye blink freq.<br>
-          → Optical flow<br>
-          → Texture (LBP)<br>
-          → FFT artifacts<br>
-          → Lip sync features
+          <div class="br-title" style="color:var(--video)">📐 Landmarks</div>
+          <span class="tag video">face_alignment 68-pt</span><br>
+          4 regions:<br>
+          → Μάτια: EAR, blink,<br>
+          &nbsp;&nbsp;asymmetry<br>
+          → Jaw: position, symmetry<br>
+          → Eyebrows: velocity,<br>
+          &nbsp;&nbsp;asymmetry<br>
+          → Στόμα: MAR, aperture<br>
+          → <span class="tag video">731 dims</span>
         </div>
         <div class="br">
-          <div class="br-title" style="color:var(--shared)">🤖 Deep Models</div>
-          → <span class="tag shared">EfficientNet-B4</span><br>
-          → <span class="tag shared">Xception</span><br>
-          → FaceForensics++<br>
-          &nbsp;&nbsp;pretrained<br>
-          → Spatial embed.<br>
-          → Temporal (LSTM)
+          <div class="br-title" style="color:var(--shared)">🤖 ResNet18</div>
+          face_alignment → crop<br>
+          resize <span class="tag shared">224×224</span><br>
+          ImageNet normalize<br>
+          ResNet18 (no head)<br>
+          mean pool / frames<br>
+          → <span class="tag shared">512 dims</span>
         </div>
       </div>
-      <div class="note">⚡ Τα δύο sub-paths ενώνονται στο Step 3</div>
     </div>
 
     <div class="arr-down"></div>

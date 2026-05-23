@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from transformers import HubertModel, AutoProcessor
+from transformers import HubertModel, Wav2Vec2FeatureExtractor
 
 FEATURE_DIM = 768
 
@@ -11,7 +11,7 @@ _processor = None
 def _load(model_name: str, device: str):
     global _model, _processor
     if _model is None:
-        _processor = AutoProcessor.from_pretrained(model_name)
+        _processor = Wav2Vec2FeatureExtractor.from_pretrained(model_name)
         _model     = HubertModel.from_pretrained(model_name).to(device)
         _model.eval()
 
