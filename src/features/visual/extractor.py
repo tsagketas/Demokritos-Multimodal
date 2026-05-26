@@ -7,12 +7,12 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "src"))
 
 from data.preprocessing import extract_frames
-from features.visual import landmark_features, resnet_features
+from features.visual import landmark_features, xception_features
 from utils.results import save_stats
 
 _EXTRACTORS = {
     "landmarks": landmark_features,
-    "resnet18":  resnet_features,
+    "xception":  xception_features,
 }
 
 

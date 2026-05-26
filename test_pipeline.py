@@ -98,14 +98,14 @@ if frames is not None:
     except Exception as e:
         fail("landmark_features", e)
 
-    # ResNet18
+    # Xception
     try:
-        from features.visual import resnet_features
-        vec = resnet_features.extract(frames, {})
-        assert vec.shape == (resnet_features.FEATURE_DIM,), f"expected {resnet_features.FEATURE_DIM}, got {vec.shape}"
-        ok("resnet_features", f"shape={vec.shape}")
+        from features.visual import xception_features
+        vec = xception_features.extract(frames, {})
+        assert vec.shape == (xception_features.FEATURE_DIM,), f"expected {xception_features.FEATURE_DIM}, got {vec.shape}"
+        ok("xception_features", f"shape={vec.shape}")
     except Exception as e:
-        fail("resnet_features", e)
+        fail("xception_features", e)
 
 
 print("\n── DONE ────────────────────────────────────────────────────────────────\n")

@@ -9,4 +9,5 @@ transformers
 accelerate
 torchcodec
 face-alignment
+timm
 parselmouth
