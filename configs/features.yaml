@@ -24,10 +24,7 @@ audio:
     cache_dir: /workspace/outputs/features/hubert
 
 visual:
-  lip:
-    enabled: true
-    backbone: mobilenet_v2   # mobilenet_v2 | efficientnet_b0
-    pretrained: true
-    lip_margin: 20           # pixels around lip landmark
-    pooling: mean            # temporal pooling across frames
-    cache_dir: /workspace/outputs/features/visual
+  method: xception           # xception | landmarks
+  enabled: true
+  cache_dir: /workspace/outputs/features/visual
+  pretrained: true

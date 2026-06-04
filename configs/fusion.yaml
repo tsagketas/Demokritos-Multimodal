@@ -15,4 +15,4 @@ audio_only:
 
 multimodal:
   audio_feature: wav2vec2
-  visual_feature: lip
+  visual_feature: xception
