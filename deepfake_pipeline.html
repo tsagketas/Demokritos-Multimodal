@@ -650,8 +650,8 @@
                         <br> → Στόμα: MAR, aperture<br> → <span class="tag video">731 dims</span>
                     </div>
                     <div class="br">
-                        <div class="br-title" style="color:var(--shared)">🤖 ResNet18</div>
-                        face_alignment → crop<br> resize <span class="tag shared">224×224</span><br> ImageNet normalize<br> ResNet18 (no head)<br> mean pool / frames<br> → <span class="tag shared">512 dims</span>
+                        <div class="br-title" style="color:var(--shared)">🤖 Xception</div>
+                        face_alignment → crop<br> resize <span class="tag shared">299×299</span><br> normalize [0.5, 0.5]<br> Xception (no head)<br> mean pool / frames<br> → <span class="tag shared">2048 dims</span>
                     </div>
                 </div>
             </div>
@@ -684,14 +684,14 @@
                     <div class="wf-step">
                         <div class="wf-label" style="color:var(--video)">Video</div>
                         <span class="tag video">731d</span> landmarks &nbsp;
-                        <span class="tag shared">512d</span> ResNet18
+                        <span class="tag shared">2048d→PCA</span> Xception
                     </div>
 
                     <div class="wf-arrow"><span>▼</span></div>
 
                     <div class="wf-step">
                         <div class="wf-label" style="color:var(--fusion)">Concatenation</div>
-                        concat(audio_vec, video_vec) → <span class="tag fusion">~1300d</span>
+                        concat(audio_vec, PCA(visual_vec))<br>→ <span class="tag fusion">~1070–1540d</span> <span style="color:var(--text-dim); font-size:8px;">(PCA aligns visual to audio dim)</span>
                     </div>
 
                     <div class="wf-arrow"><span>▼</span></div>
@@ -717,7 +717,7 @@
                         <div class="wf-step" style="border-color:var(--video); background:var(--video-dim);">
                             <div class="wf-label" style="color:var(--video)">Video</div>
                             <span class="tag video">731d</span> landmarks<br>
-                            <span class="tag shared">512d</span> ResNet18
+                            <span class="tag shared">2048d</span> Xception
                         </div>
                     </div>
 
@@ -827,7 +827,7 @@
 
         <div class="footer">
             <span style="color:var(--audio)">★ Audio:</span> 3 επιλογές ανά πείραμα — Handcrafted (536d), wav2vec2 (768d), HuBERT (768d)<br>
-            <span style="color:var(--video)">★ Video:</span> 2 επιλογές — Landmarks/face_alignment (731d), ResNet18 no-head (512d)<br>
+            <span style="color:var(--video)">★ Video:</span> 2 επιλογές — Landmarks/face_alignment (731d), Xception no-head (2048d → PCA)<br>
             <span style="color:var(--fusion)">★ Fusion:</span> Unimodal audio, Unimodal video, Early fusion (concat→MLP), Late fusion (separate MLPs → combine scores)<br>
             <span style="color:var(--output)">★ Eval:</span> EER, AUC-ROC, F1, Precision, Recall, Accuracy + per-category breakdown — dataset: FakeAVCeleb v1.2<br>
             <span style="color:#6366f1;">★ Explain:</span> audio sliding window temporal heatmap + visual region ablation — post-hoc, explain.py

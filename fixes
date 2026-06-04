@@ -1,0 +1,206 @@
+Προτεινόμενες βελτιώσεις
+
+  1. Class imbalance — pos_weight στο BCEWithLogitsLoss
+
+  Πρόβλημα: Το FakeAVCeleb έχει 4 κατηγορίες με διαφορετικά μεγέθη.
+   Αν υπάρχει ανισορροπία real/fake, το μοντέλο μαθαίνει να λέει
+  πάντα τη majority κλάση.
+
+  Λύση: Υπολογισμός pos_weight = n_negatives / n_positives από το
+  train split και πέρασμα στο BCEWithLogitsLoss(pos_weight=...).
+  Αυτό είναι 1 γραμμή αλλαγή στο _training_loop και δεν αλλάζει
+  καθόλου τη δομή.
+
+  ---
+  2. Smoke test — να πιάνει και το UnimodalClassifier constructor
+
+  Πρόβλημα: Το bug που μόλις φτιάξαμε δεν θα το έβλεπε κανείς από
+  τα tests (γιατί το audio_only mode τελικά το φτιάχνει μέσω
+  run_unimodal που καλεί το constructor — οπότε θα έσπαγε εκεί,
+  αλλά χωρίς ξεκάθαρο μήνυμα).
+
+  Λύση: Να προστεθεί ένα micro-test στην αρχή του test_train.py που
+   κάνει απλά UnimodalClassifier(input_dim=768) για να επιβεβαιώνει
+   ότι το class instantiation λειτουργεί.
+
+  ---
+  3. Late fusion — να βελτιωθεί το "learned"
+
+  Πρόβλημα: Ο Linear(2→1) combiner μαθαίνει με frozen unimodal
+  models. Αυτό σημαίνει ότι τα scores που δέχεται εξαρτώνται εξ
+  ολοκλήρου από τα pretrained unimodal weights — δεν γίνεται καμία
+  joint optimization.
+
+  Επιλογές (από απλό σε πολύπλοκο):
+  - Α) Fine-tune τελευταία layer των unimodal models κατά τη late
+  fusion (low LR) — μικρή αλλαγή, καλύτερα αποτελέσματα
+  - Β) MLP(2→16→1) combiner αντί για Linear(2→1) — ελάχιστη αλλαγή
+  - Γ) End-to-end joint training από την αρχή (αλλάζει τη λογική
+  της εκπαίδευσης)
+
+  Η Α είναι η πιο pragmatic επιλογή για ερευνητικό πλαίσιο.
+
+  ---
+  Ποια από αυτές θέλεις να προχωρήσουμε;
+
+✻ Churned for 1m 32s
+
+❯ Παμε για το class imbalance πες μου τι προτινεις ακριβως να
+  κανουμε και τι αρχεια αθα φτιαξεις και τι θα κανουν κλπ κλπ
+
+● Πρόταση: Class Imbalance Fix
+
+  Τι αλλάζει και πού
+
+  Μόνο 1 αρχείο αγγίζουμε: src/train.py
+
+  Δεν χρειάζεται νέο αρχείο. Η αλλαγή είναι εντός της
+  _training_loop.
+
+  ---
+  Τι κάνει η αλλαγή
+
+  Βήμα 1 — Υπολογισμός pos_weight από το train dataset
+
+  Πριν ξεκινήσει η εκπαίδευση, μετράμε πόσα real (0) και πόσα fake
+  (1) δείγματα έχει το training set:
+
+  pos_weight = n_negatives / n_positives
+
+  Παράδειγμα: αν έχουμε 3000 real και 1000 fake → pos_weight = 3.0
+  Αυτό λέει στο loss: "κάθε λάθος στα fake μετράει 3x βαρύτερα".
+
+  Βήμα 2 — Πέρασμα στο BCEWithLogitsLoss
+
+  loss_fn = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([pos_weigh
+  t]).to(device))
+
+  Αντί για:
+  loss_fn = nn.BCEWithLogitsLoss()
+
+  ---
+  Πού γίνεται ο υπολογισμός
+
+  Χρειαζόμαστε τα labels του train set. Επιλογές:
+
+  - Α) Από το FeatureDataset — προσθέτουμε property labels που
+  επιστρέφει np.array όλων των labels. Καθαρό, reusable.
+  - Β) Inline στο _training_loop — κάνουμε loop στο train_loader
+  πριν ξεκινήσει το training. Αχρείαστο overhead (extra pass).
+  - Γ) Από το manifest CSV — διαβάζουμε απευθείας τα labels χωρίς
+  να φορτώσουμε τα .npy. Πιο γρήγορο.
+
+  Προτείνω Α — FeatureDataset.labels property. Ένα μικρό προσθετο
+  στο feature_dataset.py που επιστρέφει τα labels σαν numpy array,
+  και μετά _training_loop παίρνει pos_weight σαν optional
+  parameter.
+
+  ---
+  Ακριβής λίστα αλλαγών
+
+  Αρχείο: src/data/feature_dataset.py
+  Αλλαγή: +3 γραμμές: property labels που κάνει
+  np.array([s["label"]
+    for s in self.samples])
+  ────────────────────────────────────────
+  Αρχείο: src/train.py
+  Αλλαγή: _training_loop δέχεται pos_weight: float = None → αν
+    δοθεί, περνάει στο BCEWithLogitsLoss
+  ────────────────────────────────────────
+  Αρχείο: src/train.py
+  Αλλαγή: Στις run_early_fusion, run_unimodal: υπολογισμός
+    pos_weight από train_ds.labels και πέρασμα στο _training_loop
+
+  Το run_late_fusion με strategy "learned" παίρνει επίσης το
+  pos_weight (ο combiner εκπαιδεύεται και αυτός με τα ίδια labels).
+
+  ---
+  Τι ΔΕΝ αλλάζει
+
+  - Καμία αλλαγή στη δομή των models
+  - Καμία αλλαγή στο config/yaml
+  - Καμία αλλαγή στο evaluation
+  - Τα smoke tests δουλεύουν ως έχουν (synthetic data είναι
+  balanced, pos_weight ≈ 1.0)
+
+  ---
+  Συμφωνείς με αυτή την προσέγγιση; Αν ναι, πηγαίνω να κάνω τις
+  αλλαγές.
+
+
+
+
+  Τι προτείνω
+
+  Ένα standalone script scripts/inspect_dataset.py που:
+
+  1. Διαβάζει τα manifests (train/val/test) — χωρίς να φορτώσει
+  κανένα .npy
+  2. Δείχνει στο terminal: πόσα real/fake ανά split, πόσα ανά
+  κατηγορία
+  3. Παράγει 2 graphs:
+    - Bar chart: real vs fake count ανά split (train/val/test)
+    - Bar chart: κατανομή των 4 κατηγοριών (RealVideo-RealAudio
+  κλπ) ανά split
+
+  ---
+  Για το "αλλάζει ανά πείραμα;"
+
+  Όχι σχεδόν ποτέ. Το imbalance είναι στο dataset/split, όχι στα
+  features. Το μόνο που αλλάζει είναι το inner join στο
+  FeatureDataset — αν π.χ. το Xception αποτυγχάνει να βρει πρόσωπο
+  σε κάποια βίντεο, αυτά τα samples χάνονται. Οπότε θεωρητικά το
+  effective imbalance μπορεί να διαφέρει ελαφρά μεταξύ landmarks
+  και xception experiments.
+
+  Άρα: το script πρέπει να δέχεται και τα δύο manifests (audio +
+  visual) ώστε να δείχνει το effective dataset μετά το inner join —
+   ακριβώς αυτό που βλέπει το μοντέλο.
+
+  ---
+  Το φτιάχνω;
+
+❯ ωραια αρα ειναι γενικο ? και θα γινει μια φορα ? παμε λοιπον να
+  το γραψουμε και να παραξουμε τα graphs μια να δουμε τι παιζει
+  και αναλογως μετα πρατουμε οκ ?
+
+● Ναι, γενικό, τρέχει μια φορά. Θα δω γρήγορα τη config για τα
+  paths των manifests.
+
+   Αυτό είναι πολύ σημαντικό εύρημα. Να τι βλέπουμε:
+
+  ---
+  Αποτελέσματα
+
+  Τεράστιο imbalance: fake/real ratio = 42:1
+
+  ┌───────┬────────┬──────┬────────┬───────┐
+  │ Split │ Total  │ Real │  Fake  │ Ratio │
+  ├───────┼────────┼──────┼────────┼───────┤
+  │ train │ 15.096 │ 350  │ 14.746 │ 42:1  │
+  ├───────┼────────┼──────┼────────┼───────┤
+  │ val   │ 3.235  │ 75   │ 3.160  │ 42:1  │
+  ├───────┼────────┼──────┼────────┼───────┤
+  │ test  │ 3.235  │ 75   │ 3.160  │ 42:1  │
+  └───────┴────────┴──────┴────────┴───────┘
+
+  Κατανομή κατηγοριών:
+  - RealVideo-RealAudio → μόνο 2.3% — το πραγματικό "real" class
+  - RealVideo-FakeAudio → επίσης μόνο 2.3% — fake audio με real
+  video
+  - FakeVideo-RealAudio → 45%
+  - FakeVideo-FakeAudio → 50%
+
+  ---
+  Τι σημαίνει αυτό πρακτικά
+
+  Το label=0 (real) = μόνο RealVideo-RealAudio. Τα άλλα 3 είναι όλα
+   label=1 (fake). Αυτό εξηγεί το 42:1.
+
+  Ένα μοντέλο που λέει πάντα "fake" θα έχει 97.7% accuracy χωρίς να
+   μάθει τίποτα. Χωρίς pos_weight, το training θα κολλήσει εκεί.
+  Άρα το class imbalance fix είναι απαραίτητο, όχι optional.
+
+  ---
+  Τώρα που το βλέπουμε αυτό, παμε να κάνουμε το fix με pos_weight ≈
+   42 στο training;

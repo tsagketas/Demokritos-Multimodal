@@ -10,8 +10,8 @@ class UnimodalClassifier(nn.Module):
     and Sigmoid manually at inference.
     """
 
-    def init(self, input_dim: int, dropout: float = 0.3):
-        super().init()
+    def __init__(self, input_dim: int, dropout: float = 0.3):
+        super().__init__()
         self.classifier = nn.Sequential(
             nn.Linear(input_dim, 256),
             nn.ReLU(),
