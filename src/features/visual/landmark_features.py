@@ -22,6 +22,14 @@ EAR_BLINK_THRESHOLD = 0.2
 # Eyes(155) + Jaw(206) + Brows(122) + Mouth(248) = 731
 FEATURE_DIM = 731
 
+# Slice indices into the 731-d vector — single source of truth for explainability
+LANDMARK_REGIONS = {
+    "Eyes":  (0,   155),
+    "Jaw":   (155, 361),
+    "Brows": (361, 483),
+    "Mouth": (483, 731),
+}
+
 _fa = None
 
 

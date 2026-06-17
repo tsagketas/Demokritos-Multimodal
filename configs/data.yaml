@@ -21,5 +21,4 @@ audio:
   extract_dir: /workspace/outputs/features/audio_raw
 
 video:
-  fps: 25
   max_frames: 100

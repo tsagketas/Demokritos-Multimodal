@@ -35,6 +35,7 @@ from models.unimodal_classifier import UnimodalClassifier
 from models.late_fusion import LateFusionCombiner
 from utils.config import load_config, setup_run_dir
 from utils.results import save_metrics
+from utils.plots import plot_roc_curve, plot_confusion_matrix, plot_per_category_bar
 
 
 # ── Dataset helpers ───────────────────────────────────────────────────────────
@@ -47,6 +48,43 @@ def collate_fn(batch):
         torch.stack(visual_vecs),
         torch.stack(labels),
         list(categories),
+    )
+
+
+def make_weighted_train_loader(
+    dataset: FeatureDataset,
+    batch_size: int,
+    target_ratio: int = 5,
+) -> DataLoader:
+    """
+    WeightedRandomSampler so each batch has ~1 real per target_ratio fakes.
+    Reduces the natural 42:1 imbalance to 1:5 without touching val/test.
+    """
+    labels = dataset.labels
+    n_real = int((labels == 0).sum())
+    n_fake = int((labels == 1).sum())
+
+    w_real = n_fake / (n_real * target_ratio)
+    w_fake = 1.0
+    sample_weights = np.where(labels == 0, w_real, w_fake).astype(np.float64)
+
+    sampler = torch.utils.data.WeightedRandomSampler(
+        weights=sample_weights,
+        num_samples=len(dataset),
+        replacement=True,
+    )
+
+    print(
+        f"[sampler] WeightedRandomSampler  n_real={n_real}  n_fake={n_fake}  "
+        f"target_ratio=1:{target_ratio}  w_real={w_real:.2f}  w_fake={w_fake:.2f}"
+    )
+
+    return DataLoader(
+        dataset,
+        batch_size=batch_size,
+        sampler=sampler,
+        collate_fn=collate_fn,
+        num_workers=0,
     )
 
 
@@ -209,7 +247,8 @@ def _training_loop(
 
 # ── Output helper ─────────────────────────────────────────────────────────────
 
-def _print_and_save(metrics: dict, run_dir: Path, tag: str):
+def _print_and_save(metrics: dict, labels: np.ndarray, scores: np.ndarray,
+                    run_dir: Path, tag: str):
     print("── TEST RESULTS ────────────────────────────────────────────────────")
     for k, v in metrics.items():
         if k != "per_category":
@@ -220,6 +259,11 @@ def _print_and_save(metrics: dict, run_dir: Path, tag: str):
         for k, v in cat_m.items():
             print(f"    {k:<12} {v:.4f}")
     save_metrics(metrics, run_dir, tag=tag)
+    plots_dir = run_dir / "plots"
+    plot_roc_curve(labels, scores, plots_dir, tag)
+    plot_confusion_matrix(labels, scores, plots_dir, tag)
+    if metrics.get("per_category"):
+        plot_per_category_bar(metrics["per_category"], plots_dir, tag)
 
 
 # ── Mode runners ──────────────────────────────────────────────────────────────
@@ -231,14 +275,15 @@ def run_early_fusion(cfg, run_dir, train_ds, val_ds, test_ds,
     clf_cfg   = cfg["train"]["classifier"]
 
     audio_dim  = train_ds[0][0].shape[0]
-    visual_dim = reducer.n_components if reducer.needed else train_ds[0][1].shape[0]
+    visual_dim = reducer.output_dim if reducer.needed else train_ds[0][1].shape[0]
 
+    hidden_dims = clf_cfg.get("hidden_dims", [256, 128])
     model = EarlyFusionMLP(
         audio_dim=audio_dim, visual_dim=visual_dim,
-        dropout=clf_cfg["dropout"],
+        hidden_dims=hidden_dims, dropout=clf_cfg["dropout"],
     ).to(device)
     print(f"[train] EarlyFusionMLP  input_dim={audio_dim + visual_dim} "
-          f"({audio_dim} audio + {visual_dim} visual)")
+          f"({audio_dim} audio + {visual_dim} visual)  hidden={hidden_dims}")
 
     logit_fn = lambda a, v: model(a, v)
     score_fn = lambda a, v: torch.sigmoid(model(a, v))
@@ -248,7 +293,8 @@ def run_early_fusion(cfg, run_dir, train_ds, val_ds, test_ds,
         train_loader, val_loader, reducer, device,
         train_cfg, clf_cfg, run_dir,
         ckpt_name="best_model.pt",
-        extra_ckpt={"audio_dim": audio_dim, "visual_dim": visual_dim, "mode": "early_fusion"},
+        extra_ckpt={"audio_dim": audio_dim, "visual_dim": visual_dim,
+                    "hidden_dims": hidden_dims, "mode": "early_fusion"},
     )
 
     ckpt = torch.load(ckpt_path, map_location=device)
@@ -259,7 +305,7 @@ def run_early_fusion(cfg, run_dir, train_ds, val_ds, test_ds,
     test_labels, test_scores, test_cats = _evaluate(score_fn, test_loader, reducer, device)
     metrics = compute_metrics(test_labels, test_scores)
     metrics["per_category"] = compute_per_category(test_labels, test_scores, test_cats)
-    _print_and_save(metrics, run_dir, tag="test_early_fusion")
+    _print_and_save(metrics, test_labels, test_scores, run_dir, tag="test_early_fusion")
 
 
 def run_unimodal(cfg, run_dir, train_ds, val_ds, test_ds,
@@ -278,8 +324,11 @@ def run_unimodal(cfg, run_dir, train_ds, val_ds, test_ds,
     else:
         input_dim = train_ds[0][1].shape[0]    # e.g. 2048 for xception, 731 for landmarks
 
-    model = UnimodalClassifier(input_dim=input_dim, dropout=clf_cfg["dropout"]).to(device)
-    print(f"[train] UnimodalClassifier({modality})  input_dim={input_dim}")
+    hidden_dims = clf_cfg.get("hidden_dims", [256, 128])
+    model = UnimodalClassifier(input_dim=input_dim, hidden_dims=hidden_dims,
+                               dropout=clf_cfg["dropout"]).to(device)
+    print(f"[train] UnimodalClassifier({modality})  input_dim={input_dim}  "
+          f"hidden={hidden_dims}")
 
     if modality == "audio":
         logit_fn = lambda a, v: model(a)
@@ -293,7 +342,7 @@ def run_unimodal(cfg, run_dir, train_ds, val_ds, test_ds,
         train_loader, val_loader, reducer, device,
         train_cfg, clf_cfg, run_dir,
         ckpt_name=f"best_{modality}.pt",
-        extra_ckpt={"input_dim": input_dim, "modality": modality},
+        extra_ckpt={"input_dim": input_dim, "hidden_dims": hidden_dims, "modality": modality},
     )
 
     ckpt = torch.load(ckpt_path, map_location=device)
@@ -304,7 +353,7 @@ def run_unimodal(cfg, run_dir, train_ds, val_ds, test_ds,
     test_labels, test_scores, test_cats = _evaluate(score_fn, test_loader, reducer, device)
     metrics = compute_metrics(test_labels, test_scores)
     metrics["per_category"] = compute_per_category(test_labels, test_scores, test_cats)
-    _print_and_save(metrics, run_dir, tag=f"test_{modality}_only")
+    _print_and_save(metrics, test_labels, test_scores, run_dir, tag=f"test_{modality}_only")
 
 
 def run_late_fusion(cfg, run_dir, train_ds, val_ds, test_ds,
@@ -369,7 +418,7 @@ def run_late_fusion(cfg, run_dir, train_ds, val_ds, test_ds,
 
     metrics = compute_metrics(test_labels, test_scores)
     metrics["per_category"] = compute_per_category(test_labels, test_scores, test_cats)
-    _print_and_save(metrics, run_dir, tag=f"test_late_fusion_{strategy}")
+    _print_and_save(metrics, test_labels, test_scores, run_dir, tag=f"test_late_fusion_{strategy}")
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
@@ -405,7 +454,7 @@ def main():
 
     # ── Manifest paths ────────────────────────────────────────────────────────
     audio_dir  = Path(cfg["data"]["audio"]["extract_dir"]) / audio_method
-    visual_dir = Path(cfg["features"]["visual"]["cache_dir"])
+    visual_dir = Path(cfg["features"]["visual"]["cache_dir"]) / visual_method
 
     # ── Datasets ──────────────────────────────────────────────────────────────
     def make_ds(split):
@@ -438,11 +487,10 @@ def main():
 
     # ── DataLoaders ───────────────────────────────────────────────────────────
     bs = train_cfg["batch_size"]
-    train_loader = DataLoader(train_ds, batch_size=bs, shuffle=True,
+    train_loader = make_weighted_train_loader(train_ds, batch_size=bs, target_ratio=5)
+    val_loader   = DataLoader(val_ds,  batch_size=bs, shuffle=False,
                               collate_fn=collate_fn, num_workers=0)
-    val_loader   = DataLoader(val_ds,   batch_size=bs, shuffle=False,
-                              collate_fn=collate_fn, num_workers=0)
-    test_loader  = DataLoader(test_ds,  batch_size=bs, shuffle=False,
+    test_loader  = DataLoader(test_ds, batch_size=bs, shuffle=False,
                               collate_fn=collate_fn, num_workers=0)
 
     # ── Dispatch to mode runner ───────────────────────────────────────────────

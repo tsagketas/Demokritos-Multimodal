@@ -10,7 +10,7 @@ import tempfile
 import yaml
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 import numpy as np
 import torch
@@ -31,9 +31,10 @@ CATEGORIES = ["FakeVideo-FakeAudio", "RealVideo-RealAudio",
                "FakeVideo-RealAudio", "RealVideo-FakeAudio"]
 
 def build_synthetic_env(tmp: Path):
-    """Create fake .npy files and manifest CSVs. Returns (audio_dir, visual_dir)."""
-    audio_dir  = tmp / "features" / "audio" / "wav2vec2"
-    visual_dir = tmp / "features" / "visual"
+    """Create fake .npy files and manifest CSVs. Returns (audio_dir, visual_base_dir)."""
+    audio_dir    = tmp / "features" / "audio" / "wav2vec2"
+    visual_base  = tmp / "features" / "visual"
+    visual_dir   = visual_base / "landmarks"   # per-method subdir, matches extractor fix
     audio_dir.mkdir(parents=True)
     visual_dir.mkdir(parents=True)
 
@@ -57,7 +58,7 @@ def build_synthetic_env(tmp: Path):
         write_csv(audio_dir  / f"{split}_manifest.csv", audio_rows)
         write_csv(visual_dir / f"{split}_manifest.csv", visual_rows)
 
-    return audio_dir, visual_dir
+    return audio_dir, visual_base
 
 
 def build_configs(tmp: Path, audio_dir: Path, visual_dir: Path) -> Path:

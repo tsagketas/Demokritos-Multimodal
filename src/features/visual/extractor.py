@@ -28,7 +28,7 @@ def run(cfg: dict, dataset_splits: dict, run_dir: Path):
 
     extractor  = _EXTRACTORS[method]
     max_frames = cfg["data"]["video"]["max_frames"]
-    cache_dir  = Path(visual_cfg["cache_dir"])
+    cache_dir  = Path(visual_cfg["cache_dir"]) / method
     cache_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"\n[visual extractor] method={method}  dims={extractor.FEATURE_DIM}")

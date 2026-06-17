@@ -50,9 +50,19 @@ class VisualPCAReducer:
 
     def fit(self, X: np.ndarray) -> "VisualPCAReducer":
         if self.needed:
-            self._pca = PCA(n_components=self.n_components, random_state=42)
+            n = min(self.n_components, X.shape[0], X.shape[1])
+            self._pca = PCA(n_components=n, random_state=42)
             self._pca.fit(X)
         return self
+
+    @property
+    def output_dim(self) -> int | None:
+        """Actual output dimensionality after fit (may be < n_components if data-constrained)."""
+        if not self.needed:
+            return None
+        if self._pca is not None:
+            return int(self._pca.n_components_)
+        return self.n_components
 
     def transform(self, X: np.ndarray) -> np.ndarray:
         if not self.needed:

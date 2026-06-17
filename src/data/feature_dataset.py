@@ -52,6 +52,10 @@ class FeatureDataset(Dataset):
     def __len__(self) -> int:
         return len(self.samples)
 
+    @property
+    def labels(self) -> np.ndarray:
+        return np.array([s["label"] for s in self.samples])
+
     def __getitem__(self, idx: int):
         s = self.samples[idx]
         audio_vec = torch.from_numpy(np.load(s["audio_path"])).float()

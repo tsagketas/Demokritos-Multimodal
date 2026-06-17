@@ -16,8 +16,8 @@ class LateFusionCombiner(nn.Module):
         and Sigmoid at inference.
     """
 
-    def init(self, strategy: str = "average", weight: float = 0.5):
-        super().init()
+    def __init__(self, strategy: str = "average", weight: float = 0.5):
+        super().__init__()
         if strategy not in ("average", "learned"):
             raise ValueError(f"Unknown strategy '{strategy}'. Use 'average' or 'learned'.")
         self.strategy = strategy
