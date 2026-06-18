@@ -1,6 +1,6 @@
 dataset:
-  root: /workspace/datasets/FakeAVCeleb_v1.2
-  meta_csv: /workspace/datasets/FakeAVCeleb_v1.2/meta_data.csv
+  root: /workspace/datasets/FakeAVCeleb_v1.2/FakeAVCeleb_v1.2
+  meta_csv: /workspace/datasets/FakeAVCeleb_v1.2/FakeAVCeleb_v1.2/meta_data.csv
   categories:
     real:
       - RealVideo-RealAudio

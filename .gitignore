@@ -9,3 +9,4 @@ __pycache__/
 *.pywzs
 *.pyzw
 datasets/*
+*.npy
