@@ -28,6 +28,7 @@ def run(cfg: dict, dataset_splits: dict, run_dir: Path):
 
     extractor  = _EXTRACTORS[method]
     max_frames = cfg["data"]["video"]["max_frames"]
+    device     = cfg["train"]["training"]["device"]
     cache_dir  = Path(visual_cfg["cache_dir"]) / method
     cache_dir.mkdir(parents=True, exist_ok=True)
 
@@ -47,7 +48,7 @@ def run(cfg: dict, dataset_splits: dict, run_dir: Path):
             if not feat_path.exists():
                 try:
                     frames = extract_frames(mp4_path, max_frames=max_frames)
-                    vec    = extractor.extract(frames, visual_cfg)
+                    vec    = extractor.extract(frames, visual_cfg, device)
                     np.save(feat_path, vec)
                 except Exception as e:
                     errors += 1

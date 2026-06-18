@@ -1,0 +1,66 @@
+data:
+  audio:
+    extract_dir: /workspace/outputs/features/audio_raw
+    sample_rate: 16000
+  dataset:
+    categories:
+      fake:
+      - RealVideo-FakeAudio
+      - FakeVideo-RealAudio
+      - FakeVideo-FakeAudio
+      real:
+      - RealVideo-RealAudio
+    meta_csv: /workspace/datasets/FakeAVCeleb_v1.2/FakeAVCeleb_v1.2/meta_data.csv
+    root: /workspace/datasets/FakeAVCeleb_v1.2/FakeAVCeleb_v1.2
+  split:
+    seed: 42
+    stratify: true
+    test: 0.15
+    train: 0.7
+    val: 0.15
+  video:
+    max_frames: 100
+experiment:
+  description: Audio wav2vec2 + lip visual, late fusion
+  name: baseline_wav2vec2_late_fusion
+features:
+  audio:
+    handcrafted:
+      enabled: true
+      hop_length: 512
+      n_fft: 2048
+      n_mfcc: 40
+    hubert:
+      enabled: true
+      layer: -1
+      model_name: facebook/hubert-base-ls960
+    wav2vec2:
+      enabled: true
+      layer: -1
+      model_name: facebook/wav2vec2-base
+  visual:
+    cache_dir: /workspace/outputs/features/visual
+    enabled: true
+    method: xception
+fusion:
+  fusion:
+    late:
+      strategy: average
+      weight: 0.5
+  multimodal:
+    audio_feature: wav2vec2
+    visual_feature: xception
+train:
+  classifier:
+    dropout: 0.3
+    hidden_dims:
+    - 256
+    - 128
+  training:
+    batch_size: 64
+    device: cuda
+    early_stopping_patience: 5
+    epochs: 30
+    learning_rate: 1e-4
+    seed: 42
+    weight_decay: 1e-5

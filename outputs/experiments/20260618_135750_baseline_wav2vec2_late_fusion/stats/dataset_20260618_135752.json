@@ -1,0 +1,29 @@
+{
+  "splits": {
+    "train": 15096,
+    "val": 3235,
+    "test": 3235,
+    "total": 21566
+  },
+  "label_distribution": {
+    "train": {
+      "label_1": 14746,
+      "label_0": 350
+    },
+    "val": {
+      "label_1": 3160,
+      "label_0": 75
+    },
+    "test": {
+      "label_1": 3160,
+      "label_0": 75
+    }
+  },
+  "class_imbalance_ratio": 42.13,
+  "category_counts": {
+    "FakeVideo-FakeAudio": 10857,
+    "FakeVideo-RealAudio": 9709,
+    "RealVideo-RealAudio": 500,
+    "RealVideo-FakeAudio": 500
+  }
+}
