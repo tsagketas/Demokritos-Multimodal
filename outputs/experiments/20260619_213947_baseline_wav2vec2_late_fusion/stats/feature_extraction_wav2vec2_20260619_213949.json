@@ -1,0 +1,8 @@
+{
+  "method": "wav2vec2",
+  "splits": {
+    "test": 3235,
+    "train": 15096,
+    "val": 3235
+  }
+}

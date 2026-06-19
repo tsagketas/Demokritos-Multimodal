@@ -1,0 +1,8 @@
+=== FEATURE_EXTRACTION_VISUAL — 20260619_213949 ===
+
+  method                    landmarks
+  vector_dims               731
+splits:
+    test                      3235
+    train                     15096
+    val                       3235

@@ -11,3 +11,4 @@ torchcodec
 face-alignment
 timm
 praat-parselmouth
+matplotlib
