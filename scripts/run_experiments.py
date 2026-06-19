@@ -157,6 +157,8 @@ def main():
     parser.add_argument("--config",    default="configs/experiment.yaml")
     parser.add_argument("--skip_done", action="store_true",
                         help="Skip experiments whose run_dir already exists")
+    parser.add_argument("--landmarks-only", action="store_true",
+                        help="Skip xception experiments (landmarks visual features only)")
     args = parser.parse_args()
 
     cfg_base    = load_config(args.config)
@@ -165,16 +167,20 @@ def main():
     experiments_dir.mkdir(parents=True, exist_ok=True)
     comparison_dir.mkdir(parents=True, exist_ok=True)
 
+    experiments = [e for e in EXPERIMENTS if not args.landmarks_only or e[3] == "landmarks"]
+    total       = len(experiments)
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"\n[run_experiments] device={device}  total={len(EXPERIMENTS)} experiments\n")
+    print(f"\n[run_experiments] device={device}  total={total} experiments"
+          + (" (landmarks-only, xception skipped)" if args.landmarks_only else "") + "\n")
 
     unimodal_ckpts = {}   # {("audio"|"video", method): Path}
     all_results    = []
     failed         = []
 
-    for exp_id, mode, audio_method, visual_method, exp_name in EXPERIMENTS:
+    for exp_id, mode, audio_method, visual_method, exp_name in experiments:
         run_dir = experiments_dir / exp_name
-        banner  = f"[{exp_id:02d}/17] {exp_name}"
+        banner  = f"[{exp_id:02d}/{total}] {exp_name}"
         print("\n" + "=" * 65)
         print(f"  {banner}")
         print(f"  mode={mode}  audio={audio_method}  visual={visual_method}")
@@ -247,7 +253,7 @@ def main():
 
     # ── Final summary ─────────────────────────────────────────────────────────
     print("\n" + "=" * 65)
-    print(f"  DONE  {len(all_results)}/{len(EXPERIMENTS)} experiments completed")
+    print(f"  DONE  {len(all_results)}/{total} experiments completed")
     if failed:
         print(f"  FAILED: {', '.join(failed)}")
     print("=" * 65 + "\n")

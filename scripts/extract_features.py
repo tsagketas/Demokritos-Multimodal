@@ -52,14 +52,11 @@ def main():
     cfg_lm["features"]["visual"]["method"] = "landmarks"
     run_visual(cfg_lm, splits, run_dir)
 
-    # ── Visual: xception ──────────────────────────────────────────────────────
-    _banner("VISUAL FEATURE EXTRACTION  [5/5 xception]")
-    cfg_xc = copy.deepcopy(cfg)
-    cfg_xc["features"]["visual"]["method"] = "xception"
-    run_visual(cfg_xc, splits, run_dir)
+    # ── Visual: xception (skipped — landmarks-only pipeline) ─────────────────
+    print("\n  [skip] xception extraction disabled — proceeding to experiments.")
 
     # ── Summary ───────────────────────────────────────────────────────────────
-    _banner("ALL EXTRACTIONS COMPLETE")
+    _banner("ALL EXTRACTIONS COMPLETE (landmarks only, xception skipped)")
     audio_base  = Path(cfg["data"]["audio"]["extract_dir"])
     visual_base = Path(cfg["features"]["visual"]["cache_dir"])
     print(f"\n  Audio features  → {audio_base}")
@@ -68,11 +65,20 @@ def main():
         n = sum(1 for f in method_dir.glob("*.npy")) if method_dir.exists() else 0
         print(f"    [{method}]  {n} .npy files")
     print(f"\n  Visual features → {visual_base}")
-    for method in ["landmarks", "xception"]:
+    for method in ["landmarks"]:
         method_dir = visual_base / method
         n = sum(1 for f in method_dir.glob("*.npy")) if method_dir.exists() else 0
         print(f"    [{method}]  {n} .npy files")
     print()
+
+    # ── Experiments ───────────────────────────────────────────────────────────
+    _banner("STARTING EXPERIMENTS (landmarks-only)")
+    import subprocess
+    subprocess.run(
+        [sys.executable, str(Path(__file__).parent / "run_experiments.py"),
+         "--landmarks-only", "--config", args.config],
+        check=True,
+    )
 
 
 if __name__ == "__main__":
