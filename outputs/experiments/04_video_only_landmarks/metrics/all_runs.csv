@@ -1,0 +1,2 @@
+timestamp,tag,accuracy,auc,eer,f1,precision,recall
+20260620_002647,test_video_only,0.9765,0.5712,0.4295,0.9881,0.9768,0.9997

@@ -1,0 +1,22 @@
+=== TEST_VIDEO_ONLY RESULTS — 20260620_002647 ===
+
+  accuracy        0.9765
+  auc             0.5712
+  eer             0.4295
+  f1              0.9881
+  precision       0.9768
+  recall          0.9997
+
+--- Per Category ---
+
+  [RealVideo-RealAudio]
+    accuracy        0.0000
+
+  [RealVideo-FakeAudio]
+    accuracy        1.0000
+
+  [FakeVideo-RealAudio]
+    accuracy        0.9993
+
+  [FakeVideo-FakeAudio]
+    accuracy        1.0000

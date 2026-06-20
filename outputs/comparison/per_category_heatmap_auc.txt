@@ -1,0 +1,15 @@
+PER-CATEGORY AUC — ALL EXPERIMENTS
+=====================================================================================================================================
+
+Experiment                                   RealVideo-RealAudio   RealVideo-FakeAudio   FakeVideo-RealAudio   FakeVideo-FakeAudio   
+-------------------------------------------------------------------------------------------------------------------------------------
+01_audio_only_handcrafted                    N/A                   N/A                   N/A                   N/A                   
+02_audio_only_wav2vec2                       N/A                   N/A                   N/A                   N/A                   
+03_audio_only_hubert                         N/A                   N/A                   N/A                   N/A                   
+04_video_only_landmarks                      N/A                   N/A                   N/A                   N/A                   
+06_early_handcrafted_landmarks               N/A                   N/A                   N/A                   N/A                   
+08_early_wav2vec2_landmarks                  N/A                   N/A                   N/A                   N/A                   
+10_early_hubert_landmarks                    N/A                   N/A                   N/A                   N/A                   
+12_late_handcrafted_landmarks                N/A                   N/A                   N/A                   N/A                   
+14_late_wav2vec2_landmarks                   N/A                   N/A                   N/A                   N/A                   
+16_late_hubert_landmarks                     N/A                   N/A                   N/A                   N/A                   

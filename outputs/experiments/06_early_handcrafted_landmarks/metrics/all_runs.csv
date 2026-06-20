@@ -1,0 +1,2 @@
+timestamp,tag,accuracy,auc,eer,f1,precision,recall
+20260620_013513,test_early_fusion,0.9586,0.9322,0.1616,0.9786,0.9903,0.9671

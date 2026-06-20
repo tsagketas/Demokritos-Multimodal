@@ -1,0 +1,22 @@
+=== TEST_AUDIO_ONLY RESULTS — 20260620_001403 ===
+
+  accuracy        0.9518
+  auc             0.9074
+  eer             0.2001
+  f1              0.9750
+  precision       0.9886
+  recall          0.9617
+
+--- Per Category ---
+
+  [RealVideo-RealAudio]
+    accuracy        0.5333
+
+  [RealVideo-FakeAudio]
+    accuracy        1.0000
+
+  [FakeVideo-RealAudio]
+    accuracy        0.9272
+
+  [FakeVideo-FakeAudio]
+    accuracy        0.9918

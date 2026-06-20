@@ -1,0 +1,11 @@
+CONFUSION MATRIX — test_late_fusion_average
+Threshold: 0.5
+
+                          Pred Real    Pred Fake
+True Real                         9           66
+True Fake                        12         3150
+
+TP: 3150   FP: 66   TN: 9   FN: 12
+Accuracy:  0.9759
+Precision: 0.9795
+Recall:    0.9962
