@@ -150,6 +150,55 @@ def run_single(cfg_base: dict, mode: str, audio_method: str, visual_method: str,
     return json.loads(metrics_files[-1].read_text())
 
 
+def _load_unimodal_ckpts(experiments_dir: Path) -> dict:
+    """Load unimodal checkpoint paths from disk (for parallel / late-fusion runs)."""
+    ckpts = {}
+    for _, mode, audio_method, visual_method, exp_name in EXPERIMENTS:
+        run_dir = experiments_dir / exp_name
+        _update_unimodal_ckpts(ckpts, mode, audio_method, visual_method, run_dir)
+    return ckpts
+
+
+def _collect_results(experiments_dir: Path, experiments: list) -> list:
+    results = []
+    for exp_id, mode, audio_method, visual_method, exp_name in experiments:
+        run_dir = experiments_dir / exp_name
+        metrics_files = sorted((run_dir / "metrics").glob("test_*.json"))
+        if not metrics_files:
+            continue
+        metrics = json.loads(metrics_files[-1].read_text())
+        results.append({
+            "name": exp_name, "mode": mode,
+            "audio_method": audio_method, "visual_method": visual_method,
+            **{k: v for k, v in metrics.items() if k != "per_category"},
+            "per_category": metrics.get("per_category", {}),
+        })
+    return results
+
+
+def _generate_comparison(all_results: list, comparison_dir: Path):
+    print("\n" + "=" * 65)
+    print("  GENERATING COMPARISON REPORT")
+    print("=" * 65)
+
+    plot_comparison(all_results, comparison_dir)
+    plot_per_category_heatmap(all_results, comparison_dir, metric="auc")
+    plot_per_category_heatmap(all_results, comparison_dir, metric="accuracy")
+
+    with open(comparison_dir / "all_results.json", "w") as f:
+        json.dump(all_results, f, indent=2)
+
+    import csv
+    cols = ["name", "mode", "audio_method", "visual_method",
+            "accuracy", "auc", "eer", "f1", "precision", "recall"]
+    with open(comparison_dir / "all_results.csv", "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(all_results)
+
+    print(f"\n  Comparison saved → {comparison_dir}")
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -159,6 +208,10 @@ def main():
                         help="Skip experiments whose run_dir already exists")
     parser.add_argument("--landmarks-only", action="store_true",
                         help="Skip xception experiments (landmarks visual features only)")
+    parser.add_argument("--only", action="append", default=[],
+                        help="Run only named experiment(s), e.g. --only 08_early_wav2vec2_landmarks")
+    parser.add_argument("--comparison-only", action="store_true",
+                        help="Regenerate comparison report from existing results")
     args = parser.parse_args()
 
     cfg_base    = load_config(args.config)
@@ -168,13 +221,26 @@ def main():
     comparison_dir.mkdir(parents=True, exist_ok=True)
 
     experiments = [e for e in EXPERIMENTS if not args.landmarks_only or e[3] == "landmarks"]
+    if args.only:
+        only = set(args.only)
+        experiments = [e for e in experiments if e[4] in only]
+        if not experiments:
+            raise SystemExit(f"No matching experiments for --only {args.only}")
+
+    if args.comparison_only:
+        all_results = _collect_results(experiments_dir, experiments)
+        if all_results:
+            _generate_comparison(all_results, comparison_dir)
+        print(f"  DONE  comparison from {len(all_results)}/{len(experiments)} experiments\n")
+        return
+
     total       = len(experiments)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"\n[run_experiments] device={device}  total={total} experiments"
           + (" (landmarks-only, xception skipped)" if args.landmarks_only else "") + "\n")
 
-    unimodal_ckpts = {}   # {("audio"|"video", method): Path}
+    unimodal_ckpts = _load_unimodal_ckpts(experiments_dir)
     all_results    = []
     failed         = []
 
@@ -191,7 +257,9 @@ def main():
             print(f"  [skip] results found in {run_dir}")
             metrics_files = sorted((run_dir / "metrics").glob("test_*.json"))
             metrics = json.loads(metrics_files[-1].read_text())
-            all_results.append({"name": exp_name, **{k: v for k, v in metrics.items() if k != "per_category"},
+            all_results.append({"name": exp_name, "mode": mode,
+                                 "audio_method": audio_method, "visual_method": visual_method,
+                                 **{k: v for k, v in metrics.items() if k != "per_category"},
                                  "per_category": metrics.get("per_category", {})})
             _update_unimodal_ckpts(unimodal_ckpts, mode, audio_method, visual_method, run_dir)
             continue
@@ -222,34 +290,9 @@ def main():
             traceback.print_exc()
             failed.append(exp_name)
 
-    # ── Comparison ────────────────────────────────────────────────────────────
-    if all_results:
-        print("\n" + "=" * 65)
-        print("  GENERATING COMPARISON REPORT")
-        print("=" * 65)
-
-        plot_comparison(all_results, comparison_dir)
-        plot_per_category_heatmap(all_results, comparison_dir, metric="auc")
-        plot_per_category_heatmap(all_results, comparison_dir, metric="accuracy")
-
-        # all_results.json
-        with open(comparison_dir / "all_results.json", "w") as f:
-            json.dump(all_results, f, indent=2)
-
-        # all_results.csv
-        import csv
-        cols = ["name", "mode", "audio_method", "visual_method",
-                "accuracy", "auc", "eer", "f1", "precision", "recall"]
-        with open(comparison_dir / "all_results.csv", "w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore")
-            writer.writeheader()
-            writer.writerows(all_results)
-
-        print(f"\n  Comparison saved → {comparison_dir}")
-        print(f"    all_results.csv / all_results.json")
-        print(f"    comparison_auc.png / comparison_eer.png / comparison_f1.png")
-        print(f"    per_category_heatmap_auc.png / per_category_heatmap_accuracy.png")
-        print(f"    comparison_all.txt  (LLM-readable ranked table)")
+    # ── Comparison (single-process runs only) ─────────────────────────────────
+    if all_results and len(experiments) > 1:
+        _generate_comparison(all_results, comparison_dir)
 
     # ── Final summary ─────────────────────────────────────────────────────────
     print("\n" + "=" * 65)

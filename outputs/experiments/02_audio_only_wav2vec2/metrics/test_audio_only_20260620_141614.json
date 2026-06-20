@@ -1,0 +1,22 @@
+{
+  "accuracy": 0.8693234476367007,
+  "auc": 0.9123972169512967,
+  "eer": 0.18789373814041743,
+  "f1": 0.9287518948964123,
+  "precision": 0.9935135135135135,
+  "recall": 0.8719165085388995,
+  "per_category": {
+    "RealVideo-RealAudio": {
+      "accuracy": 0.76
+    },
+    "RealVideo-FakeAudio": {
+      "accuracy": 1.0
+    },
+    "FakeVideo-RealAudio": {
+      "accuracy": 0.7587601078167115
+    },
+    "FakeVideo-FakeAudio": {
+      "accuracy": 0.970440251572327
+    }
+  }
+}

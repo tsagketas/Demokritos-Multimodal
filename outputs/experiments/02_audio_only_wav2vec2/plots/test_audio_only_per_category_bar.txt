@@ -2,7 +2,7 @@ PER-CATEGORY METRICS — test_audio_only
 
 Category                      ACCURACY    AUC         F1          
 ------------------------------------------------------------------
-RealVideo-RealAudio           0.5333      N/A         N/A         
+RealVideo-RealAudio           0.7600      N/A         N/A         
 RealVideo-FakeAudio           1.0000      N/A         N/A         
-FakeVideo-RealAudio           0.9474      N/A         N/A         
-FakeVideo-FakeAudio           0.9931      N/A         N/A         
+FakeVideo-RealAudio           0.7588      N/A         N/A         
+FakeVideo-FakeAudio           0.9704      N/A         N/A         

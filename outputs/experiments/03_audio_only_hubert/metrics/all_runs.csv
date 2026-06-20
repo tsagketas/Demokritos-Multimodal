@@ -1,2 +1,3 @@
 timestamp,tag,accuracy,auc,eer,f1,precision,recall
 20260620_001403,test_audio_only,0.9518,0.9074,0.2001,0.975,0.9886,0.9617
+20260620_150819,test_audio_only,0.8817,0.907,0.2003,0.9359,0.9936,0.8846

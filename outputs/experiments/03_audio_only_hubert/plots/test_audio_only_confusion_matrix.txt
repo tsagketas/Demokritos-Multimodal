@@ -2,10 +2,10 @@ CONFUSION MATRIX — test_audio_only
 Threshold: 0.5
 
                           Pred Real    Pred Fake
-True Real                        40           35
-True Fake                       121         3041
+True Real                        57           18
+True Fake                       365         2797
 
-TP: 3041   FP: 35   TN: 40   FN: 121
-Accuracy:  0.9518
-Precision: 0.9886
-Recall:    0.9617
+TP: 2797   FP: 18   TN: 57   FN: 365
+Accuracy:  0.8817
+Precision: 0.9936
+Recall:    0.8846

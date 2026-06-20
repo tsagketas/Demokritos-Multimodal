@@ -2,10 +2,10 @@ CONFUSION MATRIX — test_video_only
 Threshold: 0.5
 
                           Pred Real    Pred Fake
-True Real                         0           75
-True Fake                         1         3161
+True Real                         1           74
+True Fake                        12         3150
 
-TP: 3161   FP: 75   TN: 0   FN: 1
-Accuracy:  0.9765
-Precision: 0.9768
-Recall:    0.9997
+TP: 3150   FP: 74   TN: 1   FN: 12
+Accuracy:  0.9734
+Precision: 0.9770
+Recall:    0.9962
