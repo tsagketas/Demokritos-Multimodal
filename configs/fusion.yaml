@@ -1,7 +1,7 @@
 fusion:
   late:
     strategy: average   # average | learned
-    weight: 0.5         # audio weight for average strategy
+    weight: 0.7         # audio weight for average strategy (0.7 audio / 0.3 video — audio dominates given AUC gap)
 
 multimodal:
   audio_feature: wav2vec2
