@@ -79,13 +79,15 @@ def make_weighted_train_loader(
         f"target_ratio=1:{target_ratio}  w_real={w_real:.2f}  w_fake={w_fake:.2f}"
     )
 
-    return DataLoader(
+    loader = DataLoader(
         dataset,
         batch_size=batch_size,
         sampler=sampler,
         collate_fn=collate_fn,
         num_workers=0,
     )
+    loader.sampler_target_ratio = target_ratio
+    return loader
 
 
 def collect_visual(dataset: FeatureDataset, batch_size: int = 256) -> np.ndarray:
@@ -177,7 +179,16 @@ def _training_loop(
     Trains model.parameters() only.
     Returns (ckpt_path, best_val_auc).
     """
-    loss_fn   = nn.BCEWithLogitsLoss()
+    labels_arr   = train_loader.dataset.labels
+    n_real = int((labels_arr == 0).sum())
+    n_fake = int((labels_arr == 1).sum())
+    # Sampler targets fake:real = target_ratio:1 per batch.
+    # pos_weight = 1/target_ratio balances the residual per-sample loss contribution:
+    #   fake: target_ratio × (1/target_ratio) = 1.0  ==  real: 1 × 1.0
+    target_ratio = getattr(train_loader, "sampler_target_ratio", 5)
+    pos_w  = torch.tensor([1.0 / target_ratio], dtype=torch.float32, device=device)
+    loss_fn   = nn.BCEWithLogitsLoss(pos_weight=pos_w)
+    print(f"[loss] pos_weight={pos_w.item():.4f}  (n_fake={n_fake}, n_real={n_real}, sampler_target_ratio={target_ratio})")
     optimizer = torch.optim.Adam(
         model.parameters(),
         lr=train_cfg["learning_rate"],

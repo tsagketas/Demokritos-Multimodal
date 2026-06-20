@@ -199,6 +199,10 @@ def plot_per_category_heatmap(all_results: list, comparison_dir: Path, metric: s
             if v is not None:
                 matrix[i, j] = v
 
+    if np.all(np.isnan(matrix)):
+        print(f"[plots] per_category_heatmap_{metric}: all values are NaN — skipping (single-class categories)")
+        return
+
     fig, ax = plt.subplots(figsize=(12, max(5, len(names) * 0.5 + 2)))
     try:
         import seaborn as sns
