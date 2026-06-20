@@ -1,0 +1,48 @@
+AUDIO TEMPORAL HEATMAP — Audio-only (wav2vec2)
+Window: 0.5s  Step: 0.1s  Windows: 43
+
+Time (s)     P(fake)    Label
+------------------------------------
+0.25         0.9999     FAKE
+0.35         0.9965     FAKE
+0.45         0.9986     FAKE
+0.55         0.9992     FAKE
+0.65         0.9994     FAKE
+0.75         0.9874     FAKE
+0.85         0.9995     FAKE
+0.95         0.9973     FAKE
+1.05         0.9993     FAKE
+1.15         0.9998     FAKE
+1.25         0.9994     FAKE
+1.35         0.9292     FAKE
+1.45         0.9802     FAKE
+1.55         0.9533     FAKE
+1.65         0.9765     FAKE
+1.75         0.9939     FAKE
+1.85         0.9479     FAKE
+1.95         0.9785     FAKE
+2.05         0.9896     FAKE
+2.15         0.9998     FAKE
+2.25         0.9993     FAKE
+2.35         0.9997     FAKE
+2.45         0.9984     FAKE
+2.55         0.9945     FAKE
+2.65         0.9977     FAKE
+2.75         0.9947     FAKE
+2.85         0.9989     FAKE
+2.95         0.9992     FAKE
+3.05         0.9914     FAKE
+3.15         0.9981     FAKE
+3.25         0.8758     FAKE
+3.35         0.9981     FAKE
+3.45         0.9996     FAKE
+3.55         0.9988     FAKE
+3.65         0.9353     FAKE
+3.75         0.9936     FAKE
+3.85         0.9977     FAKE
+3.95         0.9991     FAKE
+4.05         0.9999     FAKE
+4.15         0.9986     FAKE
+4.25         0.9905     FAKE
+4.35         0.9681     FAKE
+4.45         0.9990     FAKE

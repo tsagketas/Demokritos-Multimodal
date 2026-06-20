@@ -1,0 +1,9 @@
+VISUAL REGION ABLATION — Video-only (landmarks)
+Baseline P(fake): 0.6320
+
+Region     Baseline     Ablated      Drop       Impact
+--------------------------------------------------------
+Eyes       0.6320       0.6548       -0.0228    low
+Jaw        0.6320       0.5735       0.0585     HIGH
+Brows      0.6320       0.7086       -0.0766    HIGH
+Mouth      0.6320       0.6014       0.0305     low

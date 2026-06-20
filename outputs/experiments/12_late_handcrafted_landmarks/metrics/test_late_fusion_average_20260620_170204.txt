@@ -1,0 +1,22 @@
+=== TEST_LATE_FUSION_AVERAGE RESULTS — 20260620_170204 ===
+
+  accuracy        0.7794
+  auc             0.9167
+  eer             0.1703
+  f1              0.8729
+  precision       0.9984
+  recall          0.7755
+
+--- Per Category ---
+
+  [RealVideo-RealAudio]
+    accuracy        0.9467
+
+  [RealVideo-FakeAudio]
+    accuracy        0.9886
+
+  [FakeVideo-RealAudio]
+    accuracy        0.5553
+
+  [FakeVideo-FakeAudio]
+    accuracy        0.9692

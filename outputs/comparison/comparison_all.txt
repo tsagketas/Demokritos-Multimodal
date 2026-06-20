@@ -3,13 +3,13 @@ EXPERIMENT COMPARISON (sorted by AUC desc)
 
 Experiment                                   AUC         EER         F1          ACCURACY    PRECISION   RECALL      
 ---------------------------------------------------------------------------------------------------------------------
-06_early_handcrafted_landmarks               0.9322      0.1616      0.9786      0.9586      0.9903      0.9671      
-01_audio_only_handcrafted                    0.9274      0.1496      0.9645      0.9323      0.9894      0.9409      
-12_late_handcrafted_landmarks                0.9255      0.1573      0.9881      0.9765      0.9768      0.9997      
-02_audio_only_wav2vec2                       0.9122      0.1999      0.9802      0.9617      0.9887      0.9719      
-03_audio_only_hubert                         0.9074      0.2001      0.9750      0.9518      0.9886      0.9617      
-14_late_wav2vec2_landmarks                   0.8896      0.1895      0.9878      0.9759      0.9795      0.9962      
-16_late_hubert_landmarks                     0.8724      0.1849      0.9880      0.9765      0.9828      0.9934      
-08_early_wav2vec2_landmarks                  0.7697      0.2902      0.9883      0.9768      0.9768      1.0000      
-10_early_hubert_landmarks                    0.6983      0.3985      0.9883      0.9768      0.9768      1.0000      
-04_video_only_landmarks                      0.5712      0.4295      0.9881      0.9765      0.9768      0.9997      
+06_early_handcrafted_landmarks               0.9324      0.1591      0.9259      0.8647      0.9949      0.8659      
+01_audio_only_handcrafted                    0.9179      0.1621      0.8582      0.7572      0.9987      0.7524      
+12_late_handcrafted_landmarks                0.9167      0.1703      0.8729      0.7794      0.9984      0.7755      
+02_audio_only_wav2vec2                       0.9124      0.1879      0.9288      0.8693      0.9935      0.8719      
+14_late_wav2vec2_landmarks                   0.9074      0.1892      0.9377      0.8848      0.9933      0.8880      
+03_audio_only_hubert                         0.9070      0.2003      0.9359      0.8817      0.9936      0.8846      
+16_late_hubert_landmarks                     0.8758      0.1963      0.9388      0.8866      0.9936      0.8896      
+08_early_wav2vec2_landmarks                  0.6014      0.4387      0.9543      0.9129      0.9797      0.9301      
+04_video_only_landmarks                      0.5676      0.4170      0.9865      0.9734      0.9770      0.9962      
+10_early_hubert_landmarks                    0.5529      0.4468      0.0169      0.0309      0.9310      0.0085      

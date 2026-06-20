@@ -1,0 +1,9 @@
+VISUAL REGION ABLATION — Late Fusion — visual sub-model (landmarks)
+Baseline P(fake): 0.6371
+
+Region     Baseline     Ablated      Drop       Impact
+--------------------------------------------------------
+Eyes       0.6371       0.6851       -0.0480    low
+Jaw        0.6371       0.6128       0.0243     low
+Brows      0.6371       0.7150       -0.0779    HIGH
+Mouth      0.6371       0.5850       0.0521     HIGH

@@ -1,0 +1,22 @@
+=== TEST_EARLY_FUSION RESULTS — 20260620_165524 ===
+
+  accuracy        0.9129
+  auc             0.6014
+  eer             0.4387
+  f1              0.9543
+  precision       0.9797
+  recall          0.9301
+
+--- Per Category ---
+
+  [RealVideo-RealAudio]
+    accuracy        0.1867
+
+  [RealVideo-FakeAudio]
+    accuracy        0.8409
+
+  [FakeVideo-RealAudio]
+    accuracy        0.9144
+
+  [FakeVideo-FakeAudio]
+    accuracy        0.9497

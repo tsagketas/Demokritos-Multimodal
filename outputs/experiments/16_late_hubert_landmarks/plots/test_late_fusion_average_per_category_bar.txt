@@ -2,7 +2,7 @@ PER-CATEGORY METRICS — test_late_fusion_average
 
 Category                      ACCURACY    AUC         F1          
 ------------------------------------------------------------------
-RealVideo-RealAudio           0.2667      N/A         N/A         
+RealVideo-RealAudio           0.7600      N/A         N/A         
 RealVideo-FakeAudio           1.0000      N/A         N/A         
-FakeVideo-RealAudio           0.9872      N/A         N/A         
-FakeVideo-FakeAudio           0.9987      N/A         N/A         
+FakeVideo-RealAudio           0.7925      N/A         N/A         
+FakeVideo-FakeAudio           0.9742      N/A         N/A         

@@ -1,2 +1,3 @@
 timestamp,tag,accuracy,auc,eer,f1,precision,recall
 20260620_034024,test_late_fusion_average,0.9759,0.8896,0.1895,0.9878,0.9795,0.9962
+20260620_170204,test_late_fusion_average,0.8848,0.9074,0.1892,0.9377,0.9933,0.888

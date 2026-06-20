@@ -4,24 +4,24 @@
     "mode": "audio_only",
     "audio_method": "handcrafted",
     "visual_method": "landmarks",
-    "accuracy": 0.9323447636700649,
-    "auc": 0.9273582121020453,
-    "eer": 0.14955091714104998,
-    "f1": 0.9644999189495866,
-    "precision": 0.9893581642833389,
-    "recall": 0.9408602150537635,
+    "accuracy": 0.7571825764596849,
+    "auc": 0.9179422306557031,
+    "eer": 0.16206831119544596,
+    "f1": 0.8582251082251082,
+    "precision": 0.9987405541561712,
+    "recall": 0.7523719165085389,
     "per_category": {
       "RealVideo-RealAudio": {
-        "accuracy": 0.5733333333333334
+        "accuracy": 0.96
       },
       "RealVideo-FakeAudio": {
-        "accuracy": 1.0
+        "accuracy": 0.9886363636363636
       },
       "FakeVideo-RealAudio": {
-        "accuracy": 0.8766846361185984
+        "accuracy": 0.5128032345013477
       },
       "FakeVideo-FakeAudio": {
-        "accuracy": 0.9974842767295597
+        "accuracy": 0.9628930817610063
       }
     }
   },
@@ -30,24 +30,24 @@
     "mode": "audio_only",
     "audio_method": "wav2vec2",
     "visual_method": "landmarks",
-    "accuracy": 0.9616929255483473,
-    "auc": 0.9121526460046385,
-    "eer": 0.19993674889310561,
-    "f1": 0.9802232854864433,
-    "precision": 0.9887387387387387,
-    "recall": 0.971853257432005,
+    "accuracy": 0.8693234476367007,
+    "auc": 0.9123972169512967,
+    "eer": 0.18789373814041743,
+    "f1": 0.9287518948964123,
+    "precision": 0.9935135135135135,
+    "recall": 0.8719165085388995,
     "per_category": {
       "RealVideo-RealAudio": {
-        "accuracy": 0.5333333333333333
+        "accuracy": 0.76
       },
       "RealVideo-FakeAudio": {
         "accuracy": 1.0
       },
       "FakeVideo-RealAudio": {
-        "accuracy": 0.9474393530997305
+        "accuracy": 0.7587601078167115
       },
       "FakeVideo-FakeAudio": {
-        "accuracy": 0.9930817610062893
+        "accuracy": 0.970440251572327
       }
     }
   },
@@ -56,24 +56,24 @@
     "mode": "audio_only",
     "audio_method": "hubert",
     "visual_method": "landmarks",
-    "accuracy": 0.9518072289156626,
-    "auc": 0.9074214632089395,
-    "eer": 0.20009487666034156,
-    "f1": 0.9749919846104521,
-    "precision": 0.9886215864759428,
-    "recall": 0.9617330803289058,
+    "accuracy": 0.8816805684275564,
+    "auc": 0.9070377398271137,
+    "eer": 0.2002530044275775,
+    "f1": 0.9359210306173665,
+    "precision": 0.9936056838365896,
+    "recall": 0.8845667299177735,
     "per_category": {
       "RealVideo-RealAudio": {
-        "accuracy": 0.5333333333333333
+        "accuracy": 0.76
       },
       "RealVideo-FakeAudio": {
         "accuracy": 1.0
       },
       "FakeVideo-RealAudio": {
-        "accuracy": 0.9272237196765498
+        "accuracy": 0.7830188679245284
       },
       "FakeVideo-FakeAudio": {
-        "accuracy": 0.9918238993710692
+        "accuracy": 0.9729559748427673
       }
     }
   },
@@ -82,24 +82,24 @@
     "mode": "video_only",
     "audio_method": "wav2vec2",
     "visual_method": "landmarks",
-    "accuracy": 0.9765214704973741,
-    "auc": 0.571180687328695,
-    "eer": 0.4294939911448451,
-    "f1": 0.9881212879024696,
-    "precision": 0.9768232385661311,
-    "recall": 0.9996837444655281,
+    "accuracy": 0.9734321902996602,
+    "auc": 0.5675585072738772,
+    "eer": 0.4169765970904491,
+    "f1": 0.9865330410272471,
+    "precision": 0.9770471464019851,
+    "recall": 0.9962049335863378,
     "per_category": {
       "RealVideo-RealAudio": {
-        "accuracy": 0.0
+        "accuracy": 0.013333333333333334
       },
       "RealVideo-FakeAudio": {
         "accuracy": 1.0
       },
       "FakeVideo-RealAudio": {
-        "accuracy": 0.9993261455525606
+        "accuracy": 0.9959568733153639
       },
       "FakeVideo-FakeAudio": {
-        "accuracy": 1.0
+        "accuracy": 0.9962264150943396
       }
     }
   },
@@ -108,24 +108,24 @@
     "mode": "early_fusion",
     "audio_method": "handcrafted",
     "visual_method": "landmarks",
-    "accuracy": 0.9586036453506332,
-    "auc": 0.9321737297069365,
-    "eer": 0.16159392789373817,
-    "f1": 0.97856,
-    "precision": 0.9902849740932642,
-    "recall": 0.9671094244149273,
+    "accuracy": 0.8646895273401297,
+    "auc": 0.9324077588024458,
+    "eer": 0.1590638836179633,
+    "f1": 0.925938451132905,
+    "precision": 0.9949127906976745,
+    "recall": 0.8659076533839343,
     "per_category": {
       "RealVideo-RealAudio": {
-        "accuracy": 0.6
+        "accuracy": 0.8133333333333334
       },
       "RealVideo-FakeAudio": {
         "accuracy": 1.0
       },
       "FakeVideo-RealAudio": {
-        "accuracy": 0.9319407008086253
+        "accuracy": 0.7250673854447439
       },
       "FakeVideo-FakeAudio": {
-        "accuracy": 0.9981132075471698
+        "accuracy": 0.989937106918239
       }
     }
   },
@@ -134,24 +134,24 @@
     "mode": "early_fusion",
     "audio_method": "wav2vec2",
     "visual_method": "landmarks",
-    "accuracy": 0.9768303985171455,
-    "auc": 0.7697343453510437,
-    "eer": 0.290246679316888,
-    "f1": 0.9882794186591655,
-    "precision": 0.9768303985171455,
-    "recall": 1.0,
+    "accuracy": 0.9128822984244671,
+    "auc": 0.6014442336074214,
+    "eer": 0.43869070208728655,
+    "f1": 0.95425048669695,
+    "precision": 0.9796802131912059,
+    "recall": 0.9301075268817204,
     "per_category": {
       "RealVideo-RealAudio": {
-        "accuracy": 0.0
+        "accuracy": 0.18666666666666668
       },
       "RealVideo-FakeAudio": {
-        "accuracy": 1.0
+        "accuracy": 0.8409090909090909
       },
       "FakeVideo-RealAudio": {
-        "accuracy": 1.0
+        "accuracy": 0.9144204851752021
       },
       "FakeVideo-FakeAudio": {
-        "accuracy": 1.0
+        "accuracy": 0.949685534591195
       }
     }
   },
@@ -160,24 +160,24 @@
     "mode": "early_fusion",
     "audio_method": "hubert",
     "visual_method": "landmarks",
-    "accuracy": 0.9768303985171455,
-    "auc": 0.6983069787054608,
-    "eer": 0.3984503478810879,
-    "f1": 0.9882794186591655,
-    "precision": 0.9768303985171455,
-    "recall": 1.0,
+    "accuracy": 0.030892801977139325,
+    "auc": 0.5528505165507064,
+    "eer": 0.4467678684376976,
+    "f1": 0.016922594797869006,
+    "precision": 0.9310344827586207,
+    "recall": 0.008538899430740038,
     "per_category": {
       "RealVideo-RealAudio": {
-        "accuracy": 0.0
+        "accuracy": 0.9733333333333334
       },
       "RealVideo-FakeAudio": {
-        "accuracy": 1.0
+        "accuracy": 0.011363636363636364
       },
       "FakeVideo-RealAudio": {
-        "accuracy": 1.0
+        "accuracy": 0.00876010781671159
       },
       "FakeVideo-FakeAudio": {
-        "accuracy": 1.0
+        "accuracy": 0.008176100628930818
       }
     }
   },
@@ -186,24 +186,24 @@
     "mode": "late_fusion",
     "audio_method": "handcrafted",
     "visual_method": "landmarks",
-    "accuracy": 0.9765214704973741,
-    "auc": 0.9254880877082017,
-    "eer": 0.15732447817836814,
-    "f1": 0.9881212879024696,
-    "precision": 0.9768232385661311,
-    "recall": 0.9996837444655281,
+    "accuracy": 0.7794253938832252,
+    "auc": 0.9166835336285053,
+    "eer": 0.17031625553447188,
+    "f1": 0.8729085083659666,
+    "precision": 0.998371335504886,
+    "recall": 0.7754585705249842,
     "per_category": {
       "RealVideo-RealAudio": {
-        "accuracy": 0.0
+        "accuracy": 0.9466666666666667
       },
       "RealVideo-FakeAudio": {
-        "accuracy": 1.0
+        "accuracy": 0.9886363636363636
       },
       "FakeVideo-RealAudio": {
-        "accuracy": 0.9993261455525606
+        "accuracy": 0.555256064690027
       },
       "FakeVideo-FakeAudio": {
-        "accuracy": 1.0
+        "accuracy": 0.9691823899371069
       }
     }
   },
@@ -212,24 +212,24 @@
     "mode": "late_fusion",
     "audio_method": "wav2vec2",
     "visual_method": "landmarks",
-    "accuracy": 0.9759036144578314,
-    "auc": 0.8895698924731182,
-    "eer": 0.1894750158127767,
-    "f1": 0.9877704609595485,
-    "precision": 0.9794776119402985,
-    "recall": 0.9962049335863378,
+    "accuracy": 0.8847698486252703,
+    "auc": 0.9073771874341136,
+    "eer": 0.18915876027830486,
+    "f1": 0.9377191517782602,
+    "precision": 0.9932790944464096,
+    "recall": 0.888045540796964,
     "per_category": {
       "RealVideo-RealAudio": {
-        "accuracy": 0.12
+        "accuracy": 0.7466666666666667
       },
       "RealVideo-FakeAudio": {
         "accuracy": 1.0
       },
       "FakeVideo-RealAudio": {
-        "accuracy": 0.9925876010781671
+        "accuracy": 0.7877358490566038
       },
       "FakeVideo-FakeAudio": {
-        "accuracy": 0.9993710691823899
+        "accuracy": 0.9754716981132076
       }
     }
   },
@@ -238,24 +238,24 @@
     "mode": "late_fusion",
     "audio_method": "hubert",
     "visual_method": "landmarks",
-    "accuracy": 0.9765214704973741,
-    "auc": 0.8723571579169302,
-    "eer": 0.18488931056293484,
-    "f1": 0.9880465555206039,
-    "precision": 0.9827909887359199,
-    "recall": 0.9933586337760911,
+    "accuracy": 0.8866234167438987,
+    "auc": 0.8757895846510647,
+    "eer": 0.19629981024667933,
+    "f1": 0.9387618888703487,
+    "precision": 0.9936418226774991,
+    "recall": 0.8896268184693232,
     "per_category": {
       "RealVideo-RealAudio": {
-        "accuracy": 0.26666666666666666
+        "accuracy": 0.76
       },
       "RealVideo-FakeAudio": {
         "accuracy": 1.0
       },
       "FakeVideo-RealAudio": {
-        "accuracy": 0.9871967654986523
+        "accuracy": 0.7924528301886793
       },
       "FakeVideo-FakeAudio": {
-        "accuracy": 0.9987421383647799
+        "accuracy": 0.9742138364779874
       }
     }
   }

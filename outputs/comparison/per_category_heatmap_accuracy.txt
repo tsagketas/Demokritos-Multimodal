@@ -3,13 +3,13 @@ PER-CATEGORY ACCURACY — ALL EXPERIMENTS
 
 Experiment                                   RealVideo-RealAudio   RealVideo-FakeAudio   FakeVideo-RealAudio   FakeVideo-FakeAudio   
 -------------------------------------------------------------------------------------------------------------------------------------
-01_audio_only_handcrafted                    0.5733                1.0000                0.8767                0.9975                
-02_audio_only_wav2vec2                       0.5333                1.0000                0.9474                0.9931                
-03_audio_only_hubert                         0.5333                1.0000                0.9272                0.9918                
-04_video_only_landmarks                      0.0000                1.0000                0.9993                1.0000                
-06_early_handcrafted_landmarks               0.6000                1.0000                0.9319                0.9981                
-08_early_wav2vec2_landmarks                  0.0000                1.0000                1.0000                1.0000                
-10_early_hubert_landmarks                    0.0000                1.0000                1.0000                1.0000                
-12_late_handcrafted_landmarks                0.0000                1.0000                0.9993                1.0000                
-14_late_wav2vec2_landmarks                   0.1200                1.0000                0.9926                0.9994                
-16_late_hubert_landmarks                     0.2667                1.0000                0.9872                0.9987                
+01_audio_only_handcrafted                    0.9600                0.9886                0.5128                0.9629                
+02_audio_only_wav2vec2                       0.7600                1.0000                0.7588                0.9704                
+03_audio_only_hubert                         0.7600                1.0000                0.7830                0.9730                
+04_video_only_landmarks                      0.0133                1.0000                0.9960                0.9962                
+06_early_handcrafted_landmarks               0.8133                1.0000                0.7251                0.9899                
+08_early_wav2vec2_landmarks                  0.1867                0.8409                0.9144                0.9497                
+10_early_hubert_landmarks                    0.9733                0.0114                0.0088                0.0082                
+12_late_handcrafted_landmarks                0.9467                0.9886                0.5553                0.9692                
+14_late_wav2vec2_landmarks                   0.7467                1.0000                0.7877                0.9755                
+16_late_hubert_landmarks                     0.7600                1.0000                0.7925                0.9742                

@@ -1,0 +1,9 @@
+VISUAL REGION ABLATION — Early Fusion visual (landmarks) — audio fixed
+Baseline P(fake): 0.6727
+
+Region     Baseline     Ablated      Drop       Impact
+--------------------------------------------------------
+Eyes       0.6727       0.2363       0.4364     HIGH
+Jaw        0.6727       0.9529       -0.2801    HIGH
+Brows      0.6727       0.5990       0.0737     HIGH
+Mouth      0.6727       0.3527       0.3200     HIGH

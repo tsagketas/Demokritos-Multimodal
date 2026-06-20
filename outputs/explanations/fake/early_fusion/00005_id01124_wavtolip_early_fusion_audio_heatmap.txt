@@ -1,0 +1,48 @@
+AUDIO TEMPORAL HEATMAP — Early Fusion audio (handcrafted) — visual fixed
+Window: 0.5s  Step: 0.1s  Windows: 43
+
+Time (s)     P(fake)    Label
+------------------------------------
+0.25         1.0000     FAKE
+0.35         0.8146     FAKE
+0.45         0.9579     FAKE
+0.55         0.9586     FAKE
+0.65         0.9518     FAKE
+0.75         0.9513     FAKE
+0.85         0.9687     FAKE
+0.95         0.8040     FAKE
+1.05         0.7250     FAKE
+1.15         0.8836     FAKE
+1.25         0.8693     FAKE
+1.35         0.9703     FAKE
+1.45         0.9565     FAKE
+1.55         0.9762     FAKE
+1.65         0.9786     FAKE
+1.75         0.9921     FAKE
+1.85         0.9968     FAKE
+1.95         0.9917     FAKE
+2.05         0.9937     FAKE
+2.15         0.9723     FAKE
+2.25         0.9949     FAKE
+2.35         0.9980     FAKE
+2.45         0.9989     FAKE
+2.55         1.0000     FAKE
+2.65         1.0000     FAKE
+2.75         0.9997     FAKE
+2.85         0.9990     FAKE
+2.95         0.9993     FAKE
+3.05         0.9929     FAKE
+3.15         0.9977     FAKE
+3.25         0.9981     FAKE
+3.35         0.9853     FAKE
+3.45         0.8342     FAKE
+3.55         0.9929     FAKE
+3.65         0.9940     FAKE
+3.75         0.9900     FAKE
+3.85         0.9855     FAKE
+3.95         0.9939     FAKE
+4.05         0.9384     FAKE
+4.15         0.9155     FAKE
+4.25         0.6563     FAKE
+4.35         0.7079     FAKE
+4.45         0.8102     FAKE

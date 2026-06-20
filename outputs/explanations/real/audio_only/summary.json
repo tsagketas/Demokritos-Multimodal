@@ -1,0 +1,9 @@
+{
+  "video": "/workspace/datasets/FakeAVCeleb_v1.2/FakeAVCeleb_v1.2/RealVideo-RealAudio/Asian (East)/women/id03940/00025.mp4",
+  "mode": "audio_only",
+  "audio_method": "wav2vec2",
+  "visual_method": "landmarks",
+  "duration_sec": 10.24,
+  "n_frames": 100,
+  "output_dir": "/workspace/outputs/explanations/real/audio_only"
+}
