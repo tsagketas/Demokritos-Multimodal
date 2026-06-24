@@ -1,0 +1,262 @@
+[
+  {
+    "name": "01_audio_only_handcrafted",
+    "mode": "audio_only",
+    "audio_method": "handcrafted",
+    "visual_method": "landmarks",
+    "accuracy": 0.9323447636700649,
+    "auc": 0.9273582121020453,
+    "eer": 0.14955091714104998,
+    "f1": 0.9644999189495866,
+    "precision": 0.9893581642833389,
+    "recall": 0.9408602150537635,
+    "per_category": {
+      "RealVideo-RealAudio": {
+        "accuracy": 0.5733333333333334
+      },
+      "RealVideo-FakeAudio": {
+        "accuracy": 1.0
+      },
+      "FakeVideo-RealAudio": {
+        "accuracy": 0.8766846361185984
+      },
+      "FakeVideo-FakeAudio": {
+        "accuracy": 0.9974842767295597
+      }
+    }
+  },
+  {
+    "name": "02_audio_only_wav2vec2",
+    "mode": "audio_only",
+    "audio_method": "wav2vec2",
+    "visual_method": "landmarks",
+    "accuracy": 0.9616929255483473,
+    "auc": 0.9121526460046385,
+    "eer": 0.19993674889310561,
+    "f1": 0.9802232854864433,
+    "precision": 0.9887387387387387,
+    "recall": 0.971853257432005,
+    "per_category": {
+      "RealVideo-RealAudio": {
+        "accuracy": 0.5333333333333333
+      },
+      "RealVideo-FakeAudio": {
+        "accuracy": 1.0
+      },
+      "FakeVideo-RealAudio": {
+        "accuracy": 0.9474393530997305
+      },
+      "FakeVideo-FakeAudio": {
+        "accuracy": 0.9930817610062893
+      }
+    }
+  },
+  {
+    "name": "03_audio_only_hubert",
+    "mode": "audio_only",
+    "audio_method": "hubert",
+    "visual_method": "landmarks",
+    "accuracy": 0.9518072289156626,
+    "auc": 0.9074214632089395,
+    "eer": 0.20009487666034156,
+    "f1": 0.9749919846104521,
+    "precision": 0.9886215864759428,
+    "recall": 0.9617330803289058,
+    "per_category": {
+      "RealVideo-RealAudio": {
+        "accuracy": 0.5333333333333333
+      },
+      "RealVideo-FakeAudio": {
+        "accuracy": 1.0
+      },
+      "FakeVideo-RealAudio": {
+        "accuracy": 0.9272237196765498
+      },
+      "FakeVideo-FakeAudio": {
+        "accuracy": 0.9918238993710692
+      }
+    }
+  },
+  {
+    "name": "04_video_only_landmarks",
+    "mode": "video_only",
+    "audio_method": "wav2vec2",
+    "visual_method": "landmarks",
+    "accuracy": 0.9765214704973741,
+    "auc": 0.571180687328695,
+    "eer": 0.4294939911448451,
+    "f1": 0.9881212879024696,
+    "precision": 0.9768232385661311,
+    "recall": 0.9996837444655281,
+    "per_category": {
+      "RealVideo-RealAudio": {
+        "accuracy": 0.0
+      },
+      "RealVideo-FakeAudio": {
+        "accuracy": 1.0
+      },
+      "FakeVideo-RealAudio": {
+        "accuracy": 0.9993261455525606
+      },
+      "FakeVideo-FakeAudio": {
+        "accuracy": 1.0
+      }
+    }
+  },
+  {
+    "name": "06_early_handcrafted_landmarks",
+    "mode": "early_fusion",
+    "audio_method": "handcrafted",
+    "visual_method": "landmarks",
+    "accuracy": 0.9586036453506332,
+    "auc": 0.9321737297069365,
+    "eer": 0.16159392789373817,
+    "f1": 0.97856,
+    "precision": 0.9902849740932642,
+    "recall": 0.9671094244149273,
+    "per_category": {
+      "RealVideo-RealAudio": {
+        "accuracy": 0.6
+      },
+      "RealVideo-FakeAudio": {
+        "accuracy": 1.0
+      },
+      "FakeVideo-RealAudio": {
+        "accuracy": 0.9319407008086253
+      },
+      "FakeVideo-FakeAudio": {
+        "accuracy": 0.9981132075471698
+      }
+    }
+  },
+  {
+    "name": "08_early_wav2vec2_landmarks",
+    "mode": "early_fusion",
+    "audio_method": "wav2vec2",
+    "visual_method": "landmarks",
+    "accuracy": 0.9768303985171455,
+    "auc": 0.7697343453510437,
+    "eer": 0.290246679316888,
+    "f1": 0.9882794186591655,
+    "precision": 0.9768303985171455,
+    "recall": 1.0,
+    "per_category": {
+      "RealVideo-RealAudio": {
+        "accuracy": 0.0
+      },
+      "RealVideo-FakeAudio": {
+        "accuracy": 1.0
+      },
+      "FakeVideo-RealAudio": {
+        "accuracy": 1.0
+      },
+      "FakeVideo-FakeAudio": {
+        "accuracy": 1.0
+      }
+    }
+  },
+  {
+    "name": "10_early_hubert_landmarks",
+    "mode": "early_fusion",
+    "audio_method": "hubert",
+    "visual_method": "landmarks",
+    "accuracy": 0.9768303985171455,
+    "auc": 0.6983069787054608,
+    "eer": 0.3984503478810879,
+    "f1": 0.9882794186591655,
+    "precision": 0.9768303985171455,
+    "recall": 1.0,
+    "per_category": {
+      "RealVideo-RealAudio": {
+        "accuracy": 0.0
+      },
+      "RealVideo-FakeAudio": {
+        "accuracy": 1.0
+      },
+      "FakeVideo-RealAudio": {
+        "accuracy": 1.0
+      },
+      "FakeVideo-FakeAudio": {
+        "accuracy": 1.0
+      }
+    }
+  },
+  {
+    "name": "12_late_handcrafted_landmarks",
+    "mode": "late_fusion",
+    "audio_method": "handcrafted",
+    "visual_method": "landmarks",
+    "accuracy": 0.9765214704973741,
+    "auc": 0.9254880877082017,
+    "eer": 0.15732447817836814,
+    "f1": 0.9881212879024696,
+    "precision": 0.9768232385661311,
+    "recall": 0.9996837444655281,
+    "per_category": {
+      "RealVideo-RealAudio": {
+        "accuracy": 0.0
+      },
+      "RealVideo-FakeAudio": {
+        "accuracy": 1.0
+      },
+      "FakeVideo-RealAudio": {
+        "accuracy": 0.9993261455525606
+      },
+      "FakeVideo-FakeAudio": {
+        "accuracy": 1.0
+      }
+    }
+  },
+  {
+    "name": "14_late_wav2vec2_landmarks",
+    "mode": "late_fusion",
+    "audio_method": "wav2vec2",
+    "visual_method": "landmarks",
+    "accuracy": 0.9759036144578314,
+    "auc": 0.8895698924731182,
+    "eer": 0.1894750158127767,
+    "f1": 0.9877704609595485,
+    "precision": 0.9794776119402985,
+    "recall": 0.9962049335863378,
+    "per_category": {
+      "RealVideo-RealAudio": {
+        "accuracy": 0.12
+      },
+      "RealVideo-FakeAudio": {
+        "accuracy": 1.0
+      },
+      "FakeVideo-RealAudio": {
+        "accuracy": 0.9925876010781671
+      },
+      "FakeVideo-FakeAudio": {
+        "accuracy": 0.9993710691823899
+      }
+    }
+  },
+  {
+    "name": "16_late_hubert_landmarks",
+    "mode": "late_fusion",
+    "audio_method": "hubert",
+    "visual_method": "landmarks",
+    "accuracy": 0.9765214704973741,
+    "auc": 0.8723571579169302,
+    "eer": 0.18488931056293484,
+    "f1": 0.9880465555206039,
+    "precision": 0.9827909887359199,
+    "recall": 0.9933586337760911,
+    "per_category": {
+      "RealVideo-RealAudio": {
+        "accuracy": 0.26666666666666666
+      },
+      "RealVideo-FakeAudio": {
+        "accuracy": 1.0
+      },
+      "FakeVideo-RealAudio": {
+        "accuracy": 0.9871967654986523
+      },
+      "FakeVideo-FakeAudio": {
+        "accuracy": 0.9987421383647799
+      }
+    }
+  }
+]

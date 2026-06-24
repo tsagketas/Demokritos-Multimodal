@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="el">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Multimodal Deepfake Speech Detection</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css" />
+    <style>
+        /* ── Base ── */
+        
+         :root {
+            --bg: #ffffff;
+            --surface: #f1f5f9;
+            --border: #cbd5e1;
+            --text: #0f172a;
+            --muted: #64748b;
+            --accent: #1d4ed8;
+            --accent2: #0369a1;
+            --rule: #e2e8f0;
+        }
+        
+        .reveal-viewport {
+            background: var(--bg);
+        }
+        
+        .reveal {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text);
+            font-size: 24px;
+        }
+        
+        .reveal .slides section {
+            text-align: left;
+            height: 100%;
+            box-sizing: border-box;
+            padding: 44px 72px 28px 72px;
+        }
+        
+        .reveal h1,
+        .reveal h2,
+        .reveal h3 {
+            text-transform: none;
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text);
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            margin: 0;
+        }
+        
+        .reveal h2 {
+            font-size: 1.3em;
+            padding-bottom: 0.35em;
+            border-bottom: 2px solid var(--accent);
+            margin-bottom: 0.65em;
+            color: var(--accent);
+        }
+        
+        .reveal h3 {
+            font-size: 0.9em;
+            color: var(--accent2);
+            margin-bottom: 0.3em;
+        }
+        
+        .reveal p,
+        .reveal li {
+            font-size: 0.78em;
+            line-height: 1.6;
+            color: var(--text);
+        }
+        
+        .reveal ul {
+            margin: 0.25em 0 0 1.1em;
+        }
+        
+        .reveal ul li {
+            margin-bottom: 0.25em;
+        }
+        
+        .reveal strong {
+            color: var(--accent);
+            font-weight: 600;
+        }
+        /* ── Layout ── */
+        
+        .cols {
+            display: flex;
+            gap: 2em;
+            align-items: flex-start;
+        }
+        
+        .col {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .col-sm {
+            flex: 0.7;
+            min-width: 0;
+        }
+        
+        .col-lg {
+            flex: 1.4;
+            min-width: 0;
+        }
+        /* ── Tables ── */
+        
+        .reveal table {
+            font-size: 0.68em;
+            border-collapse: collapse;
+            width: 100%;
+            margin: 0;
+        }
+        
+        .reveal table th {
+            background: var(--accent);
+            color: #fff;
+            padding: 0.5em 1em;
+            font-weight: 600;
+            text-align: left;
+            border: none;
+        }
+        
+        .reveal table td {
+            padding: 0.42em 1em;
+            border-bottom: 1px solid var(--rule);
+            color: var(--text);
+        }
+        
+        .reveal table tr:nth-child(even) td {
+            background: #f8fafc;
+        }
+        
+        .reveal table tr.hl td {
+            background: #dbeafe;
+            font-weight: 600;
+        }
+        
+        .reveal table tr.bad td {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .reveal table td.pos {
+            color: #166534;
+            font-weight: 600;
+        }
+        
+        .reveal table td.neg {
+            color: #991b1b;
+            font-weight: 600;
+        }
+        
+        .reveal table td.neu {
+            color: var(--muted);
+        }
+        /* ── Inline note boxes ── */
+        
+        .note {
+            background: #f0f7ff;
+            border-left: 3px solid var(--accent);
+            padding: 0.5em 0.85em;
+            font-size: 0.72em;
+            margin-top: 0.65em;
+            color: var(--text);
+            border-radius: 0 3px 3px 0;
+        }
+        
+        .note-warn {
+            background: #fffbeb;
+            border-left: 3px solid #d97706;
+            padding: 0.5em 0.85em;
+            font-size: 0.72em;
+            margin-top: 0.55em;
+            border-radius: 0 3px 3px 0;
+        }
+        
+        .note-bad {
+            background: #fef2f2;
+            border-left: 3px solid #dc2626;
+            padding: 0.5em 0.85em;
+            font-size: 0.72em;
+            margin-top: 0.55em;
+            border-radius: 0 3px 3px 0;
+        }
+
+        .metric-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.7em;
+            margin-top: 0.8em;
+        }
+
+        .metric-card {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+            padding: 0.6em 0.75em;
+        }
+
+        .metric-card .metric-title {
+            font-size: 0.6em;
+            color: var(--muted);
+            margin-bottom: 0.15em;
+        }
+
+        .metric-card .metric-value {
+            font-size: 1.25em;
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1.1;
+        }
+
+        .metric-card .metric-caption {
+            font-size: 0.62em;
+            color: var(--text);
+            line-height: 1.35;
+            margin-top: 0.25em;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75em;
+            margin-top: 0.65em;
+        }
+
+        .feature-card {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+            padding: 0.72em 0.8em;
+            min-height: 150px;
+        }
+
+        .feature-card.primary {
+            border-color: #0369a1;
+            background: #f0f9ff;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 0.35em;
+        }
+
+        .feature-card p {
+            font-size: 0.64em;
+            line-height: 1.45;
+            margin: 0;
+        }
+
+        .feature-card .dim {
+            display: inline-block;
+            margin-bottom: 0.35em;
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 1.05em;
+        }
+
+        .feature-summary {
+            display: grid;
+            grid-template-columns: 1.4fr 0.9fr;
+            gap: 0.75em;
+            align-items: stretch;
+            margin-top: 0.75em;
+        }
+
+        .mini-flow {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.65em 0.8em;
+        }
+
+        .arch-card {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+            padding: 0.58em 0.7em;
+            text-align: center;
+            font-size: 0.62em;
+            line-height: 1.35;
+        }
+
+        .arch-card strong {
+            color: var(--accent);
+            display: block;
+            margin-bottom: 0.12em;
+        }
+
+        .arch-card.audio strong {
+            color: #0369a1;
+        }
+
+        .arch-card.visual strong {
+            color: #b45309;
+        }
+
+        .arch-card.model {
+            border-color: var(--accent);
+            background: #eff6ff;
+        }
+
+        .arch-card.warn {
+            border-color: #d97706;
+            background: #fffbeb;
+        }
+
+        .arch-arrow {
+            color: var(--muted);
+            text-align: center;
+            font-weight: 700;
+            align-self: center;
+        }
+
+        .arch-row {
+            display: grid;
+            grid-template-columns: 1fr 0.16fr 1fr 0.16fr 1fr 0.16fr 0.9fr;
+            gap: 0.35em;
+            align-items: stretch;
+            margin-top: 0.65em;
+        }
+
+        .arch-stack {
+            display: grid;
+            gap: 0.35em;
+        }
+
+        .late-flow {
+            display: grid;
+            gap: 0.24em;
+        }
+
+        .late-flow .arch-card {
+            min-height: 72px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .late-flow-arrow {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.8em;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .region-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5em;
+            margin-top: 0.55em;
+        }
+        /* ── Code / math ── */
+        
+        .math {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.75em;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.55em 1em;
+            margin: 0.45em 0;
+            color: #0f172a;
+            line-height: 1.7;
+        }
+        /* ── Stat row ── */
+        
+        .stats {
+            display: flex;
+            gap: 1.2em;
+            margin-bottom: 0.8em;
+        }
+        
+        .stat {
+            flex: 1;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.6em 0.8em;
+            text-align: center;
+        }
+        
+        .stat .big {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1.1;
+        }
+        
+        .stat .lbl {
+            font-size: 0.62em;
+            color: var(--muted);
+            margin-top: 0.15em;
+        }
+        /* ── Pipeline diagram ── */
+        
+        .pipeline {
+            margin: 0.5em 0;
+        }
+        
+        .pipe-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0;
+            margin-bottom: 0.3em;
+        }
+        
+        .pbox {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.4em 0.75em;
+            font-size: 0.65em;
+            text-align: center;
+            background: #fff;
+            white-space: nowrap;
+            color: var(--text);
+        }
+        
+        .pbox-accent {
+            border-color: var(--accent);
+            background: #eff6ff;
+            color: var(--accent);
+            font-weight: 600;
+        }
+        
+        .parr {
+            font-size: 0.7em;
+            color: var(--muted);
+            padding: 0 0.3em;
+            flex-shrink: 0;
+        }
+        
+        .pipe-branch {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25em;
+            margin-right: 0.3em;
+        }
+
+        .pipeline-card {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.85em 1em;
+            margin-bottom: 0.55em;
+        }
+
+        .pipeline-card > div[style*="align-items:stretch"] {
+            display: none !important;
+        }
+
+        .pipeline-flow {
+            display: grid;
+            grid-template-columns: 0.9fr 0.18fr 2.35fr 0.18fr 1.15fr 0.18fr 0.9fr 0.18fr 0.85fr;
+            gap: 0.28em;
+            align-items: center;
+        }
+
+        .pipeline-branches {
+            display: grid;
+            gap: 0.35em;
+        }
+
+        .pipeline-lane {
+            display: grid;
+            grid-template-columns: 0.58fr 0.12fr 0.88fr;
+            gap: 0.25em;
+            align-items: stretch;
+        }
+
+        .pipeline-fusion {
+            display: grid;
+            gap: 0.3em;
+        }
+
+        .pipeline-node {
+            min-height: 58px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+            padding: 0.5em 0.55em;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.58em;
+            line-height: 1.22;
+            color: var(--text);
+            box-sizing: border-box;
+        }
+
+        .pipeline-node strong {
+            color: inherit;
+            font-size: 1.06em;
+        }
+
+        .pipeline-node small {
+            color: var(--muted);
+            font-size: 0.88em;
+            margin-top: 0.18em;
+        }
+
+        .pipeline-node.audio {
+            border-color: #0369a1;
+            color: #0369a1;
+        }
+
+        .pipeline-node.video {
+            border-color: #b45309;
+            color: #b45309;
+        }
+
+        .pipeline-node.fusion {
+            border-color: var(--accent);
+            background: #eff6ff;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .pipeline-node.muted {
+            color: var(--muted);
+            border-style: dashed;
+        }
+
+        .pipeline-arrow {
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+            font-weight: 600;
+            min-width: 18px;
+        }
+
+        .pipeline-tag {
+            display: inline-block;
+            align-self: center;
+            margin: 0 auto 0.18em auto;
+            padding: 0.1em 0.45em;
+            border-radius: 999px;
+            background: #e2e8f0;
+            color: #334155;
+            font-size: 0.78em;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+        /* ── Image captions ── */
+        
+        .cap {
+            font-size: 0.6em;
+            color: var(--muted);
+            text-align: center;
+            margin-top: 0.2em;
+        }
+        
+        .reveal img {
+            max-width: 100%;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+        }
+        /* ── Category grid ── */
+        
+        .cat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6em;
+        }
+        
+        .cat {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.55em 0.75em;
+            font-size: 0.72em;
+        }
+        
+        .cat .cat-title {
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.2em;
+        }
+        
+        .cat-real {
+            border-color: #16a34a;
+        }
+        
+        .cat-real .cat-title {
+            color: #16a34a;
+        }
+        /* ── Title slide ── */
+        
+        .title-slide {
+            display: flex !important;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+            padding: 0 80px !important;
+        }
+        
+        .title-slide h1 {
+            font-size: 1.9em;
+            line-height: 1.2;
+            color: var(--accent);
+            margin-bottom: 0.15em;
+        }
+        
+        .title-slide .sub {
+            font-size: 0.8em;
+            color: var(--muted);
+            margin-bottom: 1.2em;
+        }
+        
+        .title-rule {
+            width: 60px;
+            height: 3px;
+            background: var(--accent);
+            margin: 0.6em 0 0.9em 0;
+        }
+        
+        .title-slide .authors {
+            font-size: 0.7em;
+            color: var(--text);
+            margin-bottom: 0.3em;
+        }
+        
+        .title-slide .course {
+            font-size: 0.6em;
+            color: var(--muted);
+        }
+        /* ── Q&A ── */
+        
+        .qa-slide {
+            display: flex !important;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            text-align: center;
+        }
+        
+        .qa-slide h1 {
+            font-size: 2.2em;
+            color: var(--accent);
+            margin-bottom: 0.3em;
+        }
+        
+        .qa-slide p {
+            font-size: 0.75em;
+            color: var(--muted);
+        }
+        /* ── Section label ── */
+        
+        .secnum {
+            font-size: 0.55em;
+            color: var(--muted);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 0.1em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- ══════════════════════════════════════
+     1 · TITLE
+══════════════════════════════════════ -->
+            <section class="title-slide">
+                <!-- <div class="secnum">Μεταπτυχιακό Πρόγραμμα — Εργασία Εξαμήνου</div> -->
+                <h1>Multimodal Deepfake<br/>Speech Detection</h1>
+                <div class="title-rule"></div>
+                <div class="authors">
+                    Γκάρο Αριστοτέλης <span style="color:var(--muted)">mtn2503</span>&emsp; Πλέσσιας Γιώργος <span style="color:var(--muted)">mtn2524</span>&emsp; Τσαγκέτας Ορέστης <span style="color:var(--muted)">mtn2527</span>
+                </div>
+                <div class="course">2026</div>
+                <aside class="notes">
+                    Καλημέρα. Η εργασία μας ασχολείται με ανίχνευση deepfakes μέσω πολυτροπικής ανάλυσης ήχου και εικόνας. Ομάδα: Γκάρο, Πλέσσιας, Τσαγκέτας.
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════
+     2 · ΕΙΣΑΓΩΓΗ
+══════════════════════════════════════ -->
+            <section>
+                <h2>Εισαγωγή</h2>
+                <div class="cols">
+                    <div class="col">
+                        <p>Τα <strong>deepfakes</strong> είναι συνθετικά βίντεο όπου το πρόσωπο ή/και ο ήχος έχουν τροποποιηθεί με AI. Η ανίχνευσή τους αποτελεί ανοιχτό ερευνητικό πρόβλημα με σημαντικές εφαρμογές στη δημόσια πληροφορία και ψηφιακή ασφάλεια.</p>
+                        <br/>
+                        <p>Εξετάζουμε τέσσερις κατηγορίες βίντεο:</p>
+                        <div class="cat-grid" style="margin-top:0.4em;">
+                            <div class="cat cat-real">
+                                <div class="cat-title">RealVideo / RealAudio</div>
+                                <div>Πραγματικό βίντεο και ήχος</div>
+                            </div>
+                            <div class="cat">
+                                <div class="cat-title">FakeVideo / RealAudio</div>
+                                <div>Face-swap / lip-sync, πραγματικός ήχος</div>
+                            </div>
+                            <div class="cat">
+                                <div class="cat-title">RealVideo / FakeAudio</div>
+                                <div>Πραγματικό πρόσωπο, Fake audio</div>
+                            </div>
+                            <div class="cat">
+                                <div class="cat-title">FakeVideo / FakeAudio</div>
+                                <div>Και τα δύο συνθετικά</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm">
+                        <div class="note" style="margin-top:0.2em;">
+                            <strong>Στόχος:</strong> Binary classification (real / fake) συνδυάζοντας audio και visual features σε διάφορες στρατηγικές fusion.
+                        </div>
+                        <div class="note" style="margin-top:0.5em;">
+                            <strong>Dataset:</strong> FakeAVCeleb v1.2 — 21,566 βίντεο<br/>
+                        </div>
+                        <div class="note" style="margin-top:0.5em;">
+                            <strong>2 Runs:</strong> Run 1 baseline · Run 2 με αντιμετώπιση ανισορροπίας
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">
+                    Το πρόβλημα είναι binary classification. Τέσσερις κατηγορίες — μόνο η πρώτη είναι real. Χρησιμοποιούμε το FakeAVCeleb v1.2. Τρέξαμε δύο runs: baseline και βελτιωμένο.
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════
+     3 · DATASET
+══════════════════════════════════════ -->
+            <section>
+                <h2>Dataset — FakeAVCeleb v1.2</h2>
+                <div class="cols" style="align-items:center;">
+                    <div class="col">
+                        <div class="stats">
+                            <div class="stat">
+                                <div class="big">21,566</div>
+                                <div class="lbl">βίντεο συνολικά</div>
+                            </div>
+                            <div class="stat">
+                                <div class="big">~500</div>
+                                <div class="lbl">real (2.3%)</div>
+                            </div>
+                            <div class="stat">
+                                <div class="big" style="color:#dc2626;">42:1</div>
+                                <div class="lbl">fake : real ratio</div>
+                            </div>
+                        </div>
+                        <img src="outputs/graphs/categories_raw.png" alt="Categories" style="max-height:390px;" />
+                        <div class="cap">Κατανομή δειγμάτων ανά κατηγορία</div>
+                    </div>
+                    <div class="col-sm">
+                        <img src="outputs/graphs/imbalance_raw.png" alt="Imbalance" style="max-height:390px;" />
+                        <div class="cap">Κατανομή κλάσεων (real vs fake)</div>
+                        <div class="note-bad" style="margin-top:0.6em;">
+                            Ανισορροπία δεδομένων: ένα naive μοντέλο προβλέπει όλα τα δείγματα ως «fake» πετυχαίνει <strong>97,6% accuracy</strong>.
+
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">
+                    21,566 βίντεο, 500 real. 42:1 imbalance — η μεγαλύτερη τεχνική πρόκληση. Naive model: 97.6% accuracy, μηδενική πραγματική ικανότητα.
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════
+     4 · CLASS IMBALANCE
+══════════════════════════════════════ -->
+            <section>
+                <h2>Data Imbalance</h2>
+                <div class="cols">
+                    <div class="col">
+                        <h3>F1 </h3>
+                        <table style="margin-bottom:0.5em;">
+                            <tr>
+                                <th>Experiment</th>
+                                <th>F1</th>
+                                <th>AUC</th>
+                            </tr>
+                            <tr class="bad">
+                                <td>Video-only (Run 1)</td>
+                                <td>0.988</td>
+                                <td>0.571</td>
+                            </tr>
+                            <tr class="bad">
+                                <td>Early (HuBERT+LM, Run 1)</td>
+                                <td>0.988</td>
+                                <td>0.698</td>
+                            </tr>
+                        </table>
+                        <p>Το <strong>F1≈0.988</strong> μοιάζει εξαιρετικό, αλλά ουσιαστικά αντιγράφει την κατανομή του dataset: σχεδόν όλα τα δείγματα είναι fake.</p>
+                        <div class="note-bad">
+                            Σε τόσο έντονο imbalance, ένα μοντέλο που λέει σχεδόν πάντα <strong>«fake»</strong> μπορεί να δείχνει δυνατό σε F1/Accuracy, χωρίς να ξεχωρίζει πραγματικά real από fake.
+                        </div>
+                    </div>
+                    <div class="col-sm">
+                        <h3>AUC</h3>
+                        <p>Το <strong>AUC</strong> μετρά αν το μοντέλο δίνει υψηλότερο score στα fake από ό,τι στα real, ανεξάρτητα από το threshold που θα διαλέξουμε.</p>
+                        <div class="math">
+                            AUC = 0.5 → τυχαίο<br/> AUC = 0.7 → αδύναμο<br/> AUC = 0.9 → ισχυρό<br/> AUC = 1.0 → τέλειο
+                        </div>
+                        <div class="note" style="margin-top:0.5em;">
+                            Για τη συνέχεια, η σύγκριση των μοντέλων βασίζεται στο <strong>AUC</strong> ως κύριο και αξιόπιστο κριτήριο.
+                        </div>
+                    </div>
+                </div>
+                <div class="metric-strip">
+                    <div class="metric-card">
+                        <div class="metric-title">Class balance</div>
+                        <div class="metric-value">42:1</div>
+                        <div class="metric-caption">Η πλειοψηφική κλάση κυριαρχεί και κάνει τα απλά metrics εύκολα να παραπλανηθούν.</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-title">F1 trap</div>
+                        <div class="metric-value">0.988</div>
+                        <div class="metric-caption">Υψηλή τιμή δεν σημαίνει απαραίτητα πραγματική ικανότητα διάκρισης.</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-title">AUC</div>
+                        <div class="metric-value">0.571</div>
+                        <div class="metric-caption">Το AUC αποκαλύπτει πότε ένα μοντέλο είναι κοντά σε τυχαία κατάταξη.</div>
+                    </div>
+                </div>
+                <aside class="notes">
+                    Το βασικό μήνυμα είναι ότι F1 και Accuracy μπορεί να φαίνονται εντυπωσιακά λόγω imbalance. Το AUC δείχνει αν υπάρχει πραγματική ικανότητα κατάταξης. Για τη συνέχεια, συγκρίνουμε μοντέλα με AUC ως κύριο metric.
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════
+     5 · PIPELINE
+══════════════════════════════════════ -->
+            <section>
+                <h2>Αρχιτεκτονική Pipeline</h2>
+
+                <!-- Diagram -->
+                <div class="pipeline-card">
+                    <div class="pipeline-flow">
+                        <div class="pipeline-node">
+                            <span class="pipeline-tag">Input</span>
+                            <strong>Video</strong>
+                            <small>.mp4</small>
+                        </div>
+
+                        <div class="pipeline-arrow">&rarr;</div>
+
+                        <div class="pipeline-branches">
+                            <div class="pipeline-lane">
+                                <div class="pipeline-node audio">
+                                    <span class="pipeline-tag">Audio</span>
+                                    <strong>Extraction</strong>
+                                    <small>waveform</small>
+                                </div>
+                                <div class="pipeline-arrow">&rarr;</div>
+                                <div class="pipeline-node audio">
+                                    <strong>Feature encoder</strong>
+                                    <small>HC / wav2vec2 / HuBERT<br/>536-768 dim</small>
+                                </div>
+                            </div>
+
+                            <div class="pipeline-lane">
+                                <div class="pipeline-node video">
+                                    <span class="pipeline-tag">Visual</span>
+                                    <strong>Frame sampling</strong>
+                                    <small>faces</small>
+                                </div>
+                                <div class="pipeline-arrow">&rarr;</div>
+                                <div class="pipeline-node video">
+                                    <strong>Landmarks</strong>
+                                    <small>68 points<br/>731 dim</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pipeline-arrow">&rarr;</div>
+
+                        <div class="pipeline-fusion">
+                            <div class="pipeline-node fusion">
+                                <strong>Early fusion</strong>
+                                <small>concat + PCA</small>
+                            </div>
+                            <div class="pipeline-node fusion">
+                                <strong>Late fusion</strong>
+                            </div>
+                        </div>
+
+                        <div class="pipeline-arrow">&rarr;</div>
+
+                        <div class="pipeline-node fusion">
+                            <span class="pipeline-tag">Model</span>
+                            <strong>MLP</strong>
+                            <small>classifier</small>
+                        </div>
+
+                        <div class="pipeline-arrow">&rarr;</div>
+
+                        <div class="pipeline-node">
+                            <span class="pipeline-tag">Output</span>
+                            <strong>Score</strong>
+                            <small>[0, 1]</small>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:stretch; gap:0; justify-content:center;">
+
+                        <!-- Input -->
+                        <div style="display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                            <div class="pbox" style="width:80px;">📁 Video<br/>.mp4</div>
+                        </div>
+
+                        <div class="parr" style="align-self:center;">→</div>
+
+                        <!-- Two branches -->
+                        <div style="display:flex; flex-direction:column; gap:0.5em; justify-content:center;">
+                            <div style="display:flex; align-items:center; gap:0;">
+                                <div class="pbox" style="border-color:#0369a1; color:#0369a1; width:90px;">🎵 Audio<br/>Extraction</div>
+                                <div class="parr">→</div>
+                                <div class="pbox" style="border-color:#0369a1; color:#0369a1; width:110px;">HC / wav2vec2<br/>HuBERT<br/><span style="color:var(--muted)">536–768 dim</span></div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0;">
+                                <div class="pbox" style="border-color:#b45309; color:#b45309; width:90px;">👁 Frame<br/>Extraction</div>
+                                <div class="parr">→</div>
+                                <div class="pbox" style="border-color:#b45309; color:#b45309; width:110px;">Landmarks<br/>68 pts<br/><span style="color:var(--muted)">731 dim</span></div>
+                            </div>
+                        </div>
+
+                        <div class="parr" style="align-self:center;">→</div>
+
+                        <!-- Fusion -->
+                        <div style="display:flex; flex-direction:column; gap:0.5em; justify-content:center;">
+                            <div class="pbox pbox-accent" style="width:95px;">Early Fusion<br/>concat+PCA</div>
+                            <div class="pbox pbox-accent" style="width:95px;">Late Fusion<br/>w·s_a+(1-w)·s_v</div>
+                            <div class="pbox" style="width:95px; color:var(--muted);">Audio-only<br/>Video-only</div>
+                        </div>
+
+                        <div class="parr" style="align-self:center;">→</div>
+
+                        <!-- Classifier -->
+                        <div style="display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                            <div class="pbox pbox-accent" style="width:80px;">MLP<br/>Classifier</div>
+                        </div>
+
+                        <div class="parr" style="align-self:center;">→</div>
+
+                        <!-- Output -->
+                        <div style="display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                            <div class="pbox" style="width:75px;">score<br/>∈ [0,1]</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary table -->
+                <table>
+                    <tr>
+                        <th>Στρατηγική</th>
+                        <th>Input</th>
+                        <th>Classifier</th>
+                        <th>Experiments</th>
+                    </tr>
+                    <tr>
+                        <td>Audio-only</td>
+                        <td>Audio features μόνο</td>
+                        <td>1 MLP</td>
+                        <td>3 (HC, w2v, HuBERT)</td>
+                    </tr>
+                    <tr>
+                        <td>Video-only</td>
+                        <td>Landmarks μόνο</td>
+                        <td>1 MLP</td>
+                        <td>1</td>
+                    </tr>
+                    <tr>
+                        <td>Early Fusion</td>
+                        <td>concat(audio, visual) → PCA</td>
+                        <td>1 MLP (κοινό)</td>
+                        <td>3</td>
+                    </tr>
+                    <tr>
+                        <td>Late Fusion</td>
+                        <td>audio + visual ξεχωριστά</td>
+                        <td>2 MLP → weighted avg</td>
+                        <td>3</td>
+                    </tr>
+                </table>
+
+                <aside class="notes">
+                    Παράλληλα audio και visual features. Τρεις fusion στρατηγικές: early (concat+PCA), late (weighted avg scores), και μόνο audio/video. Συνολικά 10 experiments.
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════
+     6 · AUDIO FEATURES
+══════════════════════════════════════ -->
+            <section>
+                <h2>Audio Features</h2>
+
+                <div class="mini-flow">
+                    <div style="font-size:0.62em; color:var(--muted); margin-bottom:0.35em;">Προεπεξεργασία audio · <code>extract_audio()</code></div>
+                    <div class="pipe-row" style="justify-content:center; flex-wrap:wrap;">
+                        <div class="pbox">.mp4</div>
+                        <div class="parr">→</div>
+                        <div class="pbox">mono</div>
+                        <div class="parr">→</div>
+                        <div class="pbox">16 kHz</div>
+                        <div class="parr">→</div>
+                        <div class="pbox">trim <span style="color:var(--muted)">top_db=20</span></div>
+                        <div class="parr">→</div>
+                        <div class="pbox">normalize [-1,1]</div>
+                        <div class="parr">→</div>
+                        <div class="pbox pbox-accent">waveform (1, T)</div>
+                    </div>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card primary">
+                        <h3>Handcrafted</h3>
+                        <div class="dim">536-dim</div>
+                        <p>MFCC, spectral descriptors, ZCR, RMS και F0. Για κάθε χαρακτηριστικό κρατάμε mean / min / max / std στον χρόνο.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>wav2vec 2.0</h3>
+                        <div class="dim">768-dim</div>
+                        <p>Pretrained <code>facebook/wav2vec2-base</code>. Παίρνουμε το τελευταίο hidden layer και κάνουμε mean pooling.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>HuBERT</h3>
+                        <div class="dim">768-dim</div>
+                        <p>Pretrained <code>facebook/hubert</code>. Ίδια λογική εξαγωγής: hidden states → mean pooled vector.</p>
+                    </div>
+                </div>
+
+                <div class="feature-summary">
+                    <div class="note" style="margin-top:0;">
+                        Τα features αποθηκεύονται ως <code>.npy</code> ανά βίντεο και συνοδεύονται από manifest CSV, ώστε τα μοντέλα να εκπαιδεύονται χωρίς επανάληψη extraction.
+                    </div>
+                    <div class="math" style="margin:0; font-size:0.66em;">
+                        waveform (1, T)<br/>
+                        → extract()<br/>
+                        → vector (536 | 768)<br/>
+                        → αποθήκευση feature vector
+                    </div>
+                </div>
+
+                <aside class="notes">
+                    Ροή: mp4 → extract_audio → waveform. Μετά ένας από τρεις audio extractors. Handcrafted δίνει 536 features με temporal statistics. wav2vec2 και HuBERT δίνουν 768-dim embeddings με mean pooling. Τα αποθηκεύουμε σε .npy και manifest ώστε να μη γίνεται extraction σε κάθε training run.
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════
+     7 · VISUAL FEATURES
+══════════════════════════════════════ -->
+            <section>
+                <h2>Visual Features</h2>
+
+                <div class="cols" style="align-items:stretch;">
+                    <div class="col">
+                        <div class="mini-flow">
+                            <div style="font-size:0.62em; color:var(--muted); margin-bottom:0.35em;">Method · <code>src/features/visual/landmark_features.py</code></div>
+                            <div class="pipe-row" style="justify-content:center; flex-wrap:wrap;">
+                                <div class="pbox">video frames</div>
+                                <div class="parr">→</div>
+                                <div class="pbox">face_alignment</div>
+                                <div class="parr">→</div>
+                                <div class="pbox">68 points / frame</div>
+                                <div class="parr">→</div>
+                                <div class="pbox pbox-accent">731-d vector</div>
+                            </div>
+                        </div>
+
+                        <div class="region-grid">
+                            <div class="metric-card">
+                                <div class="metric-title">Eyes</div>
+                                <div class="metric-value">155</div>
+                                <div class="metric-caption">θέση, ταχύτητα, EAR, blink rate, ασυμμετρία</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-title">Jaw</div>
+                                <div class="metric-value">206</div>
+                                <div class="metric-caption">περίγραμμα προσώπου και αριστερή/δεξιά ασυμμετρία</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-title">Brows</div>
+                                <div class="metric-value">122</div>
+                                <div class="metric-caption">κίνηση φρυδιών και μεταβολή στον χρόνο</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-title">Mouth</div>
+                                <div class="metric-value">248</div>
+                                <div class="metric-caption">MAR, aperture και στατιστικά κίνησης χειλιών</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm">
+                        <div class="feature-card primary" style="min-height:auto;">
+                            <h3>Τι κρατάμε</h3>
+                            <p>Για κάθε περιοχή υπολογίζονται στατιστικά θέσης και ταχύτητας στον χρόνο. Αν δεν βρεθούν αρκετά landmarks, επιστρέφεται μηδενικό vector.</p>
+                        </div>
+                        <div class="note-warn" style="margin-top:0.65em;">
+                            Τα landmarks περιγράφουν <strong>γεωμετρία</strong>, όχι texture. Άρα δεν βλέπουν blur, skin artifacts ή ασυνέπειες φωτισμού.
+                        </div>
+                        <div class="math" style="font-size:0.66em;">
+                            Eyes 155 + Jaw 206<br/>
+                            + Brows 122 + Mouth 248<br/>
+                            = <strong>731 features</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="notes">
+                    Εδώ δείχνουμε τι είναι πραγματικά το visual feature. Χρησιμοποιούμε face_alignment 68 σημείων και χωρίζουμε το πρόσωπο σε Eyes, Jaw, Brows, Mouth. Για κάθε περιοχή κρατάμε statistics θέσης και κίνησης. Το τελικό vector είναι 731 διαστάσεις. Είναι γεωμετρία, όχι texture.
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════
+     8 · EARLY FUSION
+══════════════════════════════════════ -->
+            <section>
+                <h2>Early Fusion</h2>
+
+                <div class="arch-row">
+                    <div class="arch-card audio">
+                        <strong>Audio vector</strong>
+                        HC 536<br/>ή SSL 768
+                    </div>
+                    <div class="arch-arrow">+</div>
+                    <div class="arch-card visual">
+                        <strong>Visual vector</strong>
+                        landmarks 731<br/>ή Xception 2048
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-card warn">
+                        <strong>Visual PCA</strong>
+                        μόνο αν χρειάζεται<br/>fit στο train split
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-card model">
+                        <strong>Concat → MLP</strong>
+                        [256, 128]<br/>dropout 0.3
+                    </div>
+                </div>
+
+                <div class="cols" style="margin-top:0.85em;">
+                    <div class="col">
+                        <h3>Method</h3>
+                        <p>Το early fusion ενώνει τα δύο feature vectors <strong>πριν</strong> τον classifier. Το MLP βλέπει ταυτόχρονα audio και visual πληροφορία και μαθαίνει κοινή απόφαση.</p>
+                        <div class="math" style="font-size:0.68em;">
+                            x = concat(audio_vec, visual_vec)<br/>
+                            logit = MLP(x)<br/>
+                            score = sigmoid(logit)
+                        </div>
+                    </div>
+                    <div class="col-sm">
+                        <h3>Dimension alignment</h3>
+                        <table>
+                            <tr><th>Combination</th><th>PCA</th></tr>
+                            <tr><td>HC + landmarks</td><td>731 → 536</td></tr>
+                            <tr><td>wav2vec2/HuBERT + landmarks</td><td>passthrough</td></tr>
+                            <tr><td>SSL + Xception</td><td>2048 → 768</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <aside class="notes">
+                    Στο early fusion γίνεται concatenation πριν από το MLP. Η PCA αφορά μόνο το visual branch και μόνο όταν χρειάζεται alignment. Fit γίνεται μόνο στα train visual features για να αποφύγουμε leakage. Το MLP είναι κοινό, άρα αν το visual είναι αδύναμο μπορεί να επηρεάσει την εκπαίδευση.
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════
+     9 · LATE FUSION
+══════════════════════════════════════ -->
+            <section>
+                <h2>Late Fusion</h2>
+
+                <div class="cols" style="align-items:stretch;">
+                    <div class="col">
+                        <div class="late-flow">
+                            <div class="arch-card audio">
+                                <strong>Audio MLP</strong>
+                                audio features → sigmoid score 
+                            </div>
+                            <div class="late-flow-arrow">↓</div>
+                            <div class="arch-card visual">
+                                <strong>Video MLP</strong>
+                                visual landmarks → sigmoid score 
+                            </div>
+                            <div class="late-flow-arrow">↓</div>
+                            <div class="arch-card model">
+                                <strong>LateFusionCombiner</strong>
+                                s = w·sa + (1-w)·sv
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <h3>Method</h3>
+                        <p>Το late fusion εκπαιδεύει πρώτα δύο ανεξάρτητα unimodal μοντέλα και συνδυάζει τις τελικές πιθανότητες. Δεν κάνει concat features και δεν χρειάζεται PCA.</p>
+                        <div class="metric-strip" style="grid-template-columns:1fr 1fr; margin-top:0.5em;">
+                            <div class="metric-card">
+                                <div class="metric-title">Run 1</div>
+                                <div class="metric-value">0.5 / 0.5</div>
+                                <div class="metric-caption">ίσο βάρος audio και video πριν την αξιολόγηση</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-title">Run 2</div>
+                                <div class="metric-value">0.7 / 0.3</div>
+                                <div class="metric-caption">μεγαλύτερο βάρος στο πιο αξιόπιστο audio branch</div>
+                            </div>
+                        </div>
+                        <div class="note" style="margin-top:0.6em;">
+                            Πλεονέκτημα: αν το video branch είναι αδύναμο, μπορούμε να μειώσουμε τη συνεισφορά του χωρίς να ξανασχεδιάσουμε τα features.
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="notes">
+                    Στο late fusion δεν ενώνονται τα vectors. Έχουμε audio MLP και video MLP, παίρνουμε sigmoid scores και μετά τα συνδυάζουμε. Η υλοποίηση υποστηρίζει average και learned combiner, αλλά στα πειράματα χρησιμοποιούμε average. Στο Run 2 το weight γίνεται 0.7 υπέρ του audio.
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════
+     10 · RUN 1 RESULTS
+══════════════════════════════════════ -->
+            <section>
+                <h2>Run 1 — Baseline Αποτελέσματα</h2>
+                <div class="cols">
+                    <div class="col-lg">
+                        <table>
+                            <tr>
+                                <th>Experiment</th>
+                                <th>AUC</th>
+                                <th>EER</th>
+                                <th>F1</th>
+                                <th>ACC</th>
+                            </tr>
+                            <tr class="hl">
+                                <td>Early HC+LM</td>
+                                <td>0.9322</td>
+                                <td>0.162</td>
+                                <td>0.979</td>
+                                <td>0.959</td>
+                            </tr>
+                            <tr>
+                                <td>Audio HC</td>
+                                <td>0.9274</td>
+                                <td>0.150</td>
+                                <td>0.965</td>
+                                <td>0.932</td>
+                            </tr>
+                            <tr>
+                                <td>Late HC+LM</td>
+                                <td>0.9255</td>
+                                <td>0.157</td>
+                                <td>0.988</td>
+                                <td>0.977</td>
+                            </tr>
+                            <tr>
+                                <td>Audio wav2vec2</td>
+                                <td>0.9122</td>
+                                <td>0.200</td>
+                                <td>0.980</td>
+                                <td>0.962</td>
+                            </tr>
+                            <tr>
+                                <td>Audio HuBERT</td>
+                                <td>0.9074</td>
+                                <td>0.200</td>
+                                <td>0.975</td>
+                                <td>0.952</td>
+                            </tr>
+                            <tr>
+                                <td>Late wav2vec2+LM</td>
+                                <td>0.8896</td>
+                                <td>0.190</td>
+                                <td>0.988</td>
+                                <td>0.976</td>
+                            </tr>
+                            <tr>
+                                <td>Late HuBERT+LM</td>
+                                <td>0.8724</td>
+                                <td>0.185</td>
+                                <td>0.988</td>
+                                <td>0.977</td>
+                            </tr>
+                            <tr class="bad">
+                                <td>Early wav2vec2+LM</td>
+                                <td>0.7697</td>
+                                <td>0.290</td>
+                                <td>0.988</td>
+                                <td>0.977</td>
+                            </tr>
+                            <tr class="bad">
+                                <td>Early HuBERT+LM</td>
+                                <td>0.6983</td>
+                                <td>0.399</td>
+                                <td>0.988</td>
+                                <td>0.977</td>
+                            </tr>
+                            <tr class="bad">
+                                <td>Video-only LM</td>
+                                <td>0.5712</td>
+                                <td>0.430</td>
+                                <td>0.988</td>
+                                <td>0.977</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col">
+                        <img src="outputs/comparison_run1/comparison_auc.png" alt="Run 1 AUC comparison" style="max-height:500px; width:100%;" />
+                        <div class="cap">Σύγκριση AUC ανά πείραμα — Run 1 baseline</div>
+                    </div>
+                </div>
+                <aside class="notes">
+                    Κόκκινα rows: F1=0.988 = ποσοστό fake. AUC αποκαλύπτει: τυχαία πρόβλεψη. Late fusion υποφέρει από w=0.5 + αδύναμο video.
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════
+     11 · RUN 2 ΑΛΛΑΓΕΣ
+══════════════════════════════════════ -->
+            <section>
+                <h2>Run 2 — Τρεις Αλλαγές</h2>
+                <div class="cols">
+                    <div class="col">
+                        <div class="feature-card primary" style="min-height:auto;">
+                            <h3>1. Sampler</h3>
+                            <p><strong>WeightedRandomSampler</strong> υπήρχε ήδη στο Run 1. Στο training στοχεύει περίπου σε <strong>5 fake : 1 real</strong> αντί για 42:1. Το test set μένει αμετάβλητο.</p>
+                        </div>
+
+                        <div class="feature-card" style="min-height:auto; margin-top:0.45em;">
+                            <h3>2. Loss weighting</h3>
+                            <p>Μετά τον sampler, τα fake παραμένουν περισσότερα στο batch. Επειδή fake=positive label, χρησιμοποιούμε <strong>pos_weight=0.2</strong> για να μειωθεί η κυριαρχία τους στο loss.</p>
+                            <div class="math" style="font-size:0.64em; margin-bottom:0;">
+                                5×0.2×loss(fake) + 1×loss(real) ≈ ισόρροπο gradient
+                            </div>
+                        </div>
+
+                        <div class="feature-card" style="min-height:auto; margin-top:0.45em;">
+                            <h3>3. Late fusion weight</h3>
+                            <p>Το Run 1 έδειξε καθαρό AUC gap: audio-only <strong>0.91-0.93</strong>, video-only landmarks <strong>0.571</strong>. Άρα στο Run 2 δίνουμε μεγαλύτερο βάρος στο audio.</p>
+                            <div class="math" style="font-size:0.64em; margin-bottom:0;">
+                                s = 0.7·s<sub>audio</sub> + 0.3·s<sub>video</sub>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm">
+                        <div class="note" style="margin-top:0.2em;">
+                            Το <strong>0.7</strong> δεν είναι ακριβής μαθηματικός λόγος από το AUC. Είναι data-informed επιλογή: αρκετά υψηλή ώστε να κυριαρχεί το audio, αλλά όχι να μηδενίζει το video.
+                        </div>
+                        <div class="note-warn" style="margin-top:0.45em;">
+                            Η αλλαγή weight επηρεάζει <strong>μόνο</strong> τα 3 late fusion experiments.
+                        </div>
+                        <img src="outputs/experiments/14_late_wav2vec2_landmarks/plots/test_late_fusion_average_roc_curve.png" alt="Late w2v ROC Run2" style="max-height:420px; margin-top:0.6em;" />
+                        <div class="cap">Late wav2vec2+LM — Run 2 (AUC=0.907)</div>
+                    </div>
+                </div>
+                <aside class="notes">
+                    Τρεις αλλαγές. Ο sampler υπήρχε ήδη και φέρνει το training distribution κοντά σε 5 fake προς 1 real. Το pos_weight=0.2 αντισταθμίζει αυτό το residual ratio στο loss. Για late fusion, το AUC gap είναι σαφές: audio περίπου 0.91-0.93, video-only landmarks περίπου 0.57. Άρα το 0.7 είναι data-informed heuristic, όχι ακριβής τύπος από το AUC.
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════
+     12 · RUN 2 RESULTS
+══════════════════════════════════════ -->
+            <section>
+                <h2>Run 2 — Αποτελέσματα &amp; Σύγκριση</h2>
+                <div class="cols">
+                    <div class="col">
+                        <table>
+                            <tr>
+                                <th>Experiment</th>
+                                <th>AUC R1</th>
+                                <th>AUC R2</th>
+                                <th>ΔAUC</th>
+                            </tr>
+                            <tr>
+                                <td>Early HC+LM</td>
+                                <td>0.9322</td>
+                                <td>0.9324</td>
+                                <td class="neu">≈ 0</td>
+                            </tr>
+                            <tr>
+                                <td>Audio HC</td>
+                                <td>0.9274</td>
+                                <td>0.9179</td>
+                                <td class="neu">−0.010</td>
+                            </tr>
+                            <tr>
+                                <td>Late HC+LM</td>
+                                <td>0.9255</td>
+                                <td>0.9167</td>
+                                <td class="neu">−0.009</td>
+                            </tr>
+                            <tr>
+                                <td>Audio wav2vec2</td>
+                                <td>0.9122</td>
+                                <td>0.9124</td>
+                                <td class="neu">≈ 0</td>
+                            </tr>
+                            <tr>
+                                <td>Audio HuBERT</td>
+                                <td>0.9074</td>
+                                <td>0.9070</td>
+                                <td class="neu">≈ 0</td>
+                            </tr>
+                            <tr class="hl">
+                                <td>Late wav2vec2+LM ★</td>
+                                <td>0.8896</td>
+                                <td>0.9074</td>
+                                <td class="pos">+0.018</td>
+                            </tr>
+                            <tr>
+                                <td>Late HuBERT+LM</td>
+                                <td>0.8724</td>
+                                <td>0.8758</td>
+                                <td class="pos">+0.003</td>
+                            </tr>
+                            <tr class="bad">
+                                <td>Early wav2vec2+LM</td>
+                                <td>0.7697</td>
+                                <td>0.6014</td>
+                                <td class="neg">−0.168</td>
+                            </tr>
+                            <tr class="bad">
+                                <td>Early HuBERT+LM</td>
+                                <td>0.6983</td>
+                                <td>0.5529</td>
+                                <td class="neg">−0.145</td>
+                            </tr>
+                            <tr>
+                                <td>Video-only LM</td>
+                                <td>0.5712</td>
+                                <td>0.5676</td>
+                                <td class="neu">≈ 0</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-sm">
+                        <img src="outputs/comparison/comparison_auc.png" alt="AUC comparison" style="max-height:460px;" />
+                        <div class="cap">AUC — Run 1 vs Run 2</div>
+                    </div>
+                </div>
+                <aside class="notes">
+                    Μεικτά αποτελέσματα. Μεγαλύτερη βελτίωση: Late wav2vec2 +1.8% από το weight change. Audio-only αμετάβλητα. Early fusion με wav2vec2/HuBERT χειροτέρεψαν δραματικά — pos_weight aggressive με αδύναμα visual features. Exp 10 κατέρρευσε F1=0.017.
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════
+     13 · PER-CATEGORY
+══════════════════════════════════════ -->
+            <section>
+                <h2>Ανάλυση ανά Κατηγορία</h2>
+                <div class="cols" style="align-items:center;">
+                    <div class="col">
+                        <img src="outputs/comparison_run1/per_category_heatmap_accuracy.png" alt="Run 1 per-category heatmap" style="max-height:540px; width:100%;" />
+                        <div class="cap">Run 1 — accuracy ανά κατηγορία</div>
+                    </div>
+                    <div class="col">
+                        <img src="outputs/comparison/per_category_heatmap_accuracy.png" alt="Run 2 per-category heatmap" style="max-height:540px; width:100%;" />
+                        <div class="cap">Run 2 — accuracy ανά κατηγορία</div>
+                    </div>
+                </div>
+                <aside class="notes">
+                    Σύγκριση per-category accuracy για Run 1 και Run 2. Το Run 1 δείχνει πιο έντονη επίδραση του imbalance, ειδικά στα real videos. Στο Run 2 κάποια μοντέλα γίνονται πιο ισορροπημένα, αλλά τα landmarks παραμένουν αδύναμο visual signal.
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════
+     14 · EXPLAINABILITY
+══════════════════════════════════════ -->
+            <section>
+                <h2>Explainability</h2>
+
+                <div class="feature-grid" style="grid-template-columns:1fr 1fr; margin-top:0;">
+                    <div class="feature-card primary" style="min-height:auto;">
+                        <h3>Audio temporal heatmap</h3>
+                        <p>Sliding window <strong>0.5s</strong>, step <strong>0.1s</strong>. Κάθε παράθυρο παίρνει ανεξάρτητο P(fake), άρα βλέπουμε <em>πότε</em> ο ήχος γίνεται ύποπτος.</p>
+                    </div>
+                    <div class="feature-card" style="min-height:auto;">
+                        <h3>Visual region ablation</h3>
+                        <p>Μηδενίζουμε περιοχές landmarks: Eyes, Jaw, Brows, Mouth. Το score drop δείχνει πόσο βασίστηκε το μοντέλο σε κάθε περιοχή.</p>
+                    </div>
+                </div>
+
+                <div class="cols" style="align-items:flex-start; margin-top:0.7em;">
+                    <div class="col">
+                        <img src="outputs/explanations/fake/audio_only/00005_id01124_wavtolip_audio_only_audio_heatmap.png" alt="Fake audio heatmap" style="max-height:230px;" />
+                        <div class="cap">Fake audio — σταθερά υψηλό P(fake), min≈0.876</div>
+                    </div>
+                    <div class="col">
+                        <img src="outputs/explanations/real/audio_only/00025_audio_only_audio_heatmap.png" alt="Real audio heatmap" style="max-height:230px;" />
+                        <div class="cap">Real audio — χαμηλά windows, αλλά και false-positive peaks</div>
+                    </div>
+                    <div class="col">
+                        <img src="outputs/explanations/real/late_fusion/00025_late_fusion_region_ablation.png" alt="Region ablation" style="max-height:230px;" />
+                        <div class="cap">Late fusion visual branch — jaw/brows επηρεάζουν περισσότερο</div>
+                    </div>
+                </div>
+
+                <div class="metric-strip" style="margin-top:0.65em;">
+                    <div class="metric-card">
+                        <div class="metric-title">Fake sample</div>
+                        <div class="metric-value">43</div>
+                        <div class="metric-caption">audio windows, όλα ταξινομημένα ως fake</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-title">Real sample</div>
+                        <div class="metric-value">98</div>
+                        <div class="metric-caption">windows με έντονη διακύμανση στο P(fake)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-title">Ablation</div>
+                        <div class="metric-value">4</div>
+                        <div class="metric-caption">facial regions: Eyes, Jaw, Brows, Mouth</div>
+                    </div>
+                </div>
+
+                <aside class="notes">
+                    Δύο explainability τεχνικές. Στο audio heatmap κόβουμε το σήμα σε παράθυρα 0.5s με step 0.1s και παίρνουμε P(fake). Στο fake δείγμα όλα τα windows είναι πολύ υψηλά. Στο real δείγμα υπάρχουν χαμηλά σημεία αλλά και αρκετά false-positive peaks, που εξηγούν γιατί το μοντέλο δυσκολεύεται. Στο visual ablation μηδενίζουμε περιοχές landmarks και μετράμε score drop.
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════
+     15 · ΣΥΜΠΕΡΑΣΜΑΤΑ
+══════════════════════════════════════ -->
+            <section>
+                <h2>Συμπεράσματα</h2>
+                <div class="cols">
+                    <div class="col">
+                        <table>
+                            <tr>
+                                <th colspan="2">Κύρια ευρήματα</th>
+                            </tr>
+                            <tr>
+                                <td style="width:35%;"><strong>Audio κυριαρχεί</strong></td>
+                                <td>AUC 0.91–0.93.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Landmarks ανεπαρκή</strong></td>
+                                <td>AUC≈0.57.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Late fusion (w=0.7)</strong></td>
+                                <td>+1.8% AUC vs w=0.5.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Early fusion κίνδυνος</strong></td>
+                                <td>Αδύναμα visual features αποσταθεροποιούν την εκπαίδευση.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>pos_weight = 1/ratio</strong></td>
+                                <td>Ευαίσθητο σε αδύναμα features.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>AUC</strong></td>
+                                <td>F1/Accuracy παραπλανούν σε 42:1 imbalance.</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-sm">
+                        <div class="metric-strip" style="grid-template-columns:1fr; margin-top:0.55em;">
+                            <div class="metric-card">
+                                <div class="metric-title">Best overall</div>
+                                <div class="metric-value">0.932</div>
+                                <div class="metric-caption">Early HC+LM, ουσιαστικά ισοδύναμο με ισχυρό audio baseline.</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-title">Best robust fusion</div>
+                                <div class="metric-value">w=0.7</div>
+                                <div class="metric-caption">Late fusion όταν δίνουμε μεγαλύτερο βάρος στο audio.</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-title">Main bottleneck</div>
+                                <div class="metric-value">visual</div>
+                                <div class="metric-caption">Landmarks κρατούν γεωμετρία, όχι texture artifacts.</div>
+                            </div>
+                        </div>
+                        <div class="note" style="margin-top:0.55em;">
+                            Multimodal fusion βοηθά μόνο όταν και τα δύο modalities έχουν χρήσιμο σήμα ή όταν το fusion προστατεύει από το αδύναμο branch.
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">
+                    Έξι ευρήματα. Το βασικό συμπέρασμα: multimodal fusion προϋποθέτει ισχυρά features και στα δύο modalities. Με αδύναμο visual το audio-only είναι η καλύτερη επιλογή.
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════
+     16 · FUTURE WORK
+══════════════════════════════════════ -->
+            <section>
+                <h2>Future Work — Xception Visual Features</h2>
+                <div class="cols">
+                    <div class="col">
+                        <h3>Γιατί τα Landmarks Αποτυγχάνουν</h3>
+                        <p>Landmarks = <strong>γεωμετρία</strong>. Deepfakes αφήνουν artifacts στο <strong>texture</strong>: blurring ορίων, inconsistent skin, rendering artifacts.</p>
+
+                        <h3 style="margin-top:0.55em;">Πρόταση: Xception CNN</h3>
+                        <p>Pretrained ImageNet, depthwise separable convolutions → <strong>2048-dim</strong> texture embedding ανά frame. Η αρχιτεκτονική που χρησιμοποιείται στη βιβλιογραφία deepfake detection (FaceForensics++).</p>
+
+                        <div class="math" style="margin-top:0.4em;">
+                            Xception embedding: 2048-dim<br/> + Linear(2048 → 512) ← dimension alignment<br/> → Early / Late Fusion με audio features
+                        </div>
+
+                        <div class="note-warn" style="margin-top:0.5em;">
+                            Υλοποιηθηκε αλλα δεν δοκιμαστηκε λογω χρονικών περιορισμών — frame-by-frame extraction για 21k βίντεο απαιτεί σημαντικό GPU χρόνο.
+                        </div>
+                    </div>
+                    <div class="col-sm">
+                        <table style="margin-top:0.4em;">
+                            <tr>
+                                <th>Modality</th>
+                                <th>Τώρα</th>
+                                <th>Προβλεπόμενο</th>
+                            </tr>
+                            <tr>
+                                <td>Audio</td>
+                                <td>0.93</td>
+                                <td>0.93 (ίδιο)</td>
+                            </tr>
+                            <tr>
+                                <td>Video (LM)</td>
+                                <td>0.57</td>
+                                <td>—</td>
+                            </tr>
+                            <tr class="hl">
+                                <td>Video (Xception)</td>
+                                <td>—</td>
+                                <td>0.75–0.85+</td>
+                            </tr>
+                            <tr class="hl">
+                                <td>Multimodal</td>
+                                <td>0.907</td>
+                                <td>&gt;0.93</td>
+                            </tr>
+                        </table>
+                        <div class="note" style="margin-top:0.6em;">
+                            Με καλύτερα visual features, το early fusion αναμένεται να λειτουργήσει σωστά — ισόποση συνεισφορά και από τα δύο modalities.
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">
+                    Xception αντί landmarks. 2048-dim texture features. Extra linear 2048→512 για alignment. Εκτίμηση: video AUC 0.57→0.75-0.85+. Δεν τρέχτηκε λόγω χρόνου.
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════
+     17 · Q&A
+══════════════════════════════════════ -->
+            <section class="qa-slide">
+                <h1>Ερωτήσεις;</h1>
+                <p>Ευχαριστούμε για την προσοχή σας.</p>
+                <div style="margin-top:1.5em; font-size:0.6em; color:var(--muted);">
+                    Γκάρο Αριστοτέλης mtn2503 &nbsp;·&nbsp; Πλέσσιας Γιώργος mtn2524 &nbsp;·&nbsp; Τσαγκέτας Ορέστης mtn2527
+                </div>
+                <aside class="notes">
+                    Key facts: Best AUC 0.9324 (Early HC+LM). Best multimodal Run2: Late w2v+LM 0.9074 (+1.8% vs Run1). Early HuBERT κατέρρευσε F1=0.017.
+                </aside>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: 'c/t',
+            controls: true,
+            progress: true,
+            center: false,
+            width: 1280,
+            height: 720,
+            margin: 0.04,
+            transition: 'fade',
+            backgroundTransition: 'none',
+            plugins: []
+        });
+    </script>
+</body>
+
+</html>
